@@ -1,0 +1,265 @@
+Maven : 
+=======
+(managing automated vehicle enhancing network)
+--it is a build tool..
+
+--it is a project management tool.
+
+java project:
+--------------
+
+1.write source code.
+
+2.add external jar files to the classpath.  50 jar 
+
+3.compile the code.
+
+4.prepare test case, compile the test cases, run the test cases.
+
+--arrange all the codes in a diff folders 
+
+src 
+  ---
+test
+  ---
+webapp
+  html. js, image, jsp, 
+
+
+5.prepare the test and code analysis report.
+
+6.build the jar file, war file, ear file to bundle the application.
+
+7.deploy to the server.
+
+
+--the above process is known as build process.
+
+--manually doing this build process will increase the burden on the developers.
+
+--to automate build process of java app, Apache foundation has released a tool called
+
+ANT (another neat tool)
+
+the problem with the ANT are:
+
+1. ANT tool does not have the capability to download the jar files automatically.
+
+2.it can not compile and run the test cases automatically.
+
+3.in ANT we need to write a big xml file called build.xml to instruct all the activities.
+
+Maven : Apache foundation
+
+1.we can use maven by using command prompt (without IDE)
+
+2. using maven with IDE 
+
+                                       
+Maven terminology:
+-------------------------
+
+1. artifact :-
+
+--An artifact is an outcome in maven, it can be a file, .class file or a jar file, war file,ear file,etc.
+
+2. archetype:-
+
+--it is project template for creating similar type of project in maven.
+
+3. Groupid: 
+
+--it is an Id used to identify the artifacts of a perticular organization (naming convention is similar to package name.) com.masai.
+
+4.artiactid : it is the id for the final outcome (artifactid name will be the root folder of our application)
+
+5.pom.xml :  (project object model) : all the information will be their in this file.
+
+it defines following properties for a project:
+
+1. Name
+2.version
+
+3. packaging (jar, war, ear)
+
+4.dependecnies : required jar files.
+
+5.plugins: will inhance the functionality of our project.
+
+docker 
+jenkins 
+
+
+Maven Repository:
+================
+
+-- a repository is a store where maven maintains plugins, archetypes, and lots of jar files used for building different kinds of java projects.
+
+maven repo are of 3 types:
+
+1.central repo :- it is the maven's own repo in which it maintains all kinds of project related plugins, archetypes, jars etc.
+
+https://repo1.maven.org/maven2
+
+2.remote repo : this repo is maintained within the organization for sharing plugins, archetypes and jar files for multiple projects withing orgnizations.
+
+
+
+3.local repo: this repo will be created inside the developer computer.  (.m2) is the name for this repo.
+ 
+
+
+mysql-connector.jar
+
+
+pom.xml:
+
+.m2 --- 
+
+maven build life cycle:
+==================
+
+maven build life cycle contains diff phases:
+
+
+1. validate: - in this phase it will verify the project diectory structure is valid or not. and it has pom.xml file is there or not.
+
+2.compile: maven compiles all the source code of the project by downloading and adding requied jar files in the classpath.
+
+3.test-compile: if we have written any unit test cases those code will be compiled.
+
+4.test : maven will run all the test cases and it will show how many test cases are success and how many fails.
+
+5.package : maven will bundle our java code into a jar file inside 'target' folder.
+
+6.install : that jar file in step 5 will be stored in the localrepo.
+
+7.deploy : maven stores the application jar file to the central repo.
+
+8.clean : here maven will delete and remove all the files that are generated in previous build.
+
+
+Note: if we execute any phase to build the maven project then maven will execute all the phases till that given phase.
+
+mvn clean
+
+
+
+src/main/java  : -- here we need to place our source code
+
+src/main/resources : any xml file, properties files, text files
+
+
+src/test/java  : -- here we need to place our source code to unit testing
+
+src/test/resources : any xml file, properties files, text files to unit testing
+
+
+after creating a maven project we need to change the java  version of the maven project from jdk 5 to jdk 8
+
+
+ <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+
+after pasting the above tag inside the pom.xml file we need to update our maven project:
+
+right click on the project--->maven ---> update maven project.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Layared Architecture in Business application:-
+====================================
+
+
+1.storing the business data in secure and easily retrival manner. (DB )
+
+--the logic that we write to implement this part of business application is known as data accees logic.
+
+2.processing the data according to the business rule .
+
+--the logic that we write to implement this part of business application is known as business/service logic.
+
+3.presenting the data to the user in user-understandable format.
+
+--the logic that we write to implement this part of business application is known as presentation logic.
+
+
+--the above 3 logics is required for almost every business application.
+
+
+Note:- we can write all the 3 logics to develop a business application in one program/class itself ,
+ if we do so, the following problem we will face:-
+
+
+
+1.all the logics to develop the application will be mixed up with each other (no clear code seperation).
+
+2.modification done in one logic may affect the other logic .
+
+3. logics will depend upon each other so, parellal developement will not be possible.
+
+4.testing each logic is also will become complex..
+
+
+--to solve this problem,  a java based business application ,we devide into 3 logical partition .
+
+and each part we say as a layer:-
+
+1.Presentation Layer(UI layer)
+
+2.Business Logic Layer (Service layer)
+
+3.Data Access Layer 
+
+
+--a bussiness application will be devided into the logical partition depending upon the role played by each part.
+
+--logical partition of a business application is known as layer.
+
+
+
+
+Presentation Layer :- 
+-----------------------
+
+--it is set of java classes, which are responsible for generating user input screen and response page(output screen) is knwon as PL.
+
+--this layer provides the intraction with the end-user.
+
+
+Business Logic Layer/Service Layer:-
+------------------------------------------
+
+--programatical implementation of business rule of a business organization is nothing but business logic .
+--a collection of java classes whose methods have business logic to process the data according to the business rule is known as SL/BLL.
+
+
+Data Access Layer :-
+------------------------
+
+--a set of java classes whose methods  exclusivly meant for performing CRUD operation with the DB server is known as DAL.
+
+
+
+
+
+
+
+
+
+
+
+ 

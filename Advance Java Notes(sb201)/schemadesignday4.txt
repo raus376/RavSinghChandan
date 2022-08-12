@@ -1,0 +1,75 @@
+Schema design:
+1. State assumptions, ask clarifying questions.
+2. Identify the entities.
+3. Identify the relationships(PK/FK) and types (1:M, M:M) among the entities.
+4. By now ER diag.
+5. Convert this ER diag to sql objects.
+6. Create tables from these entities.
+7. Perform queries.
+8. If needed, optimize queries
+
+Good DB design:
+Reduce redundancy
+Providing access
+
+
+Design DB schema for a bookstore:
+options:
+1. book table has cat_id as fk (only 1 column)
+2. cat table has book_id as fk
+
+
+Book(book_id, title NN, ISBN NN, categrory_ID FK references Category)
+
+Category(category_id, name unique, desc)
+(1, romance, ".. ",1,2,3....)
+
+Author(author_id, name, bio)
+
+Book_Author(ba_id, book_id, author_id, is_main_author boolean)
+
+
+
+-- Transaction
+
+check if both the accounts are active.
+
+check if I have sufficient balance
+
+My balance - 100
+
+Your balance + 100
+
+
+start transaction;
+check if both the accounts are active.
+
+check if I have sufficient balance
+
+My balance - 100
+
+Your balance + 100
+--cancel everything, reverse, undo
+rollback;
+
+start transaction;
+check if both the accounts are active.
+
+check if I have sufficient balance
+
+My balance - 1000
+
+Your balance + 1000
+-- mark it completed
+commit;
+
+
+ACID => 
+Atomicity =>
+all the statement of the trans. are committed, or all of them are rolledback.
+Consistency: 5000 4000 =>9000, 9000
+Isolation: quarantine t1 t2
+Durability: 
+
+START TRANSACTION; insert into category values (5, "fitness", "Your fitness routine"); ROLLBACK;
+

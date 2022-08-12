@@ -1,0 +1,1270 @@
+
+Mismatched bt Object Oriented Representation and relational representaion of data:-
+------------------------------------------------------------------------------------------------------
+
+1.granularity mismatch :- HAS-A relationship problem
+
+2.inheritence mismatch :- IS-A relationship problem
+
+3.Association Mismatch :- table relationship problem
+
+
+
+1.granularity mismatch :- HAS-A relationship problem:-
+============================================
+
+@Entity 
+class Employee{  --corse grain
+
+@Id
+int eid;
+String ename;
+int salary
+
+Address addr;
+
+}
+
+
+//this type of class is known as value class or normal class, it is not an Entity class
+
+
+class Address{  --fine grain
+
+String city;
+String country;
+String pincode;
+
+
+}
+
+
+an Entity can exist independently.
+
+
+solution for the above HAS-A relation problem:-
+---------------------------------------------------------
+
+approach 1:-
+
+--we need to create a table with all column (all for corse grain + all for fine grain classes)
+
+
+apply @Embeddable at the top of Address class or @Embedded at the top of Address addr varible indside the Employee Entity.
+
+ex:-
+
+
+persistence.xml:-
+---------------------
+
+update the persistence.xml by just adding another class Employee ex:-
+
+
+<class>com.ratan.model.Employee</class>        
+
+
+Address.java:-
+-------------------
+
+
+public class Address {
+	
+	private String state;
+	private String city;
+	private String pincode;
+--
+--	
+}
+
+
+Employee.java:-
+-----------------
+
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int eid;
+	private String ename;
+	private int salary;
+	
+	@Embedded
+	private Address addr;  //here Address obj will be treated as value obj
+--
+--
+--
+
+}	
+	
+Demo.java:-
+----------------
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		Employee emp=new Employee();
+		emp.setEname("Ram");
+		emp.setSalary(7800);
+		emp.setAddr(new Address("Maharastra", "pune", "75455"));
+		
+		
+		//Address adr=new Address("maharastra", "pune","75455");
+		//emp.setAddr(adr);
+		
+		em.getTransaction().begin();
+		
+		em.persist(emp);
+		
+		em.getTransaction().commit();
+		
+		System.out.println("done...");
+		
+	}
+
+}
+
+
+
+--if we try to take 2 address (one for home and another for office ) and then try to persist the employee obj we will get exception "repeated column"
+
+--we can solve this problem by overriding the column names of Embedded obj by using "@AttributeOverrides" annotation.
+
+ex 2:-
+=====
+
+Employee.java:-
+-------------------
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int eid;
+	private String ename;
+	private int salary;
+	
+	@Embedded
+	@AttributeOverrides({
+		
+		@AttributeOverride(name="state",column=@Column(name="HOME_STATE")),
+		@AttributeOverride(name="city",column=@Column(name="HOME_CITY")),
+		@AttributeOverride(name="pincode",column=@Column(name="HOME_PINCODE"))
+		
+	})
+	private Address homeAddr;  
+	
+	@Embedded
+	@AttributeOverrides({
+		
+		@AttributeOverride(name="state",column=@Column(name="OFFICE_STATE")),
+		@AttributeOverride(name="city",column=@Column(name="OFFICE_CITY")),
+		@AttributeOverride(name="pincode",column=@Column(name="OFFICE_PINCODE"))
+		
+	})
+	private Address officeAddr; 
+	
+--
+--
+--
+
+}
+
+Demo.java:-
+---------------
+
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		Employee emp=new Employee();
+		emp.setEname("Ram");
+		emp.setSalary(7800);
+		emp.setHomeAddr(new Address("Maharastra", "pune", "75455"));
+		emp.setOfficeAddr(new Address("Telengana","hydrabad", "785422"));
+		
+		
+		em.getTransaction().begin();
+		
+		em.persist(emp);
+		
+		em.getTransaction().commit();
+		
+		System.out.println("done...");
+		
+	}
+
+}
+
+
+approach 2:- 
+-------------
+
+if any emp has more than two address then taking too many columns inside a table will violates the rules of normalization.
+
+--to solve this problem we need to use @ElementCollection annotaion, and let the user add the multiple addresses using List or Set.
+
+--in this case ORM s/w will generate a seperate table to maintain the addresses details with a Foreign key that reffers the PK of Employee table.
+
+
+ex:-
+
+Employee.java:-
+------------------
+
+	@Entity
+	public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int eid;
+	private String ename;
+	private int salary;
+	
+	@ElementCollection
+	@Embedded
+	private Set<Address> addresses=new HashSet<Address>();
+
+	//
+	}
+
+Demo.java:-
+--------------
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		Employee emp=new Employee();
+		emp.setEname("Ram");
+		emp.setSalary(7800);
+		
+		emp.getAddresses().add(new Address("st1", "ct1","78754"));
+		emp.getAddresses().add(new Address("st2", "ct2","58754"));
+		emp.getAddresses().add(new Address("st3", "ct3","98754"));
+		emp.getAddresses().add(new Address("st4", "ct4","48754"));
+		
+		
+		em.getTransaction().begin();
+		
+		em.persist(emp);
+		
+		em.getTransaction().commit();
+		
+		System.out.println("done...");
+				
+	}
+
+}		
+		
+		
+--when we execute the above application 2 tables will be created :-
+
+1.employee :- which will contains only Employee details (it will not contains any details of any address)
+
+2.employee_addresses  :- this table will contains the details of all the addresses with a FK column employee_eid which reffers the eid column of employee table.
+
+Note:- if we want to change the 2nd table 'employee_addresses' and the FK column with our 
+our choice name then we need to use @JoinTable  and @JoinColumn
+
+ex:-
+
+
+Employee.java:-
+-------------------
+
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int eid;
+	private String ename;
+	private int salary;
+	
+	@ElementCollection
+	@Embedded
+	@JoinTable(name="empaddress",joinColumns=@JoinColumn(name="emp_id"))
+	private Set<Address> addresses=new HashSet<Address>();
+
+	--
+	--
+	}
+	
+with the above example the 2nd table will be created by the name "empaddess" and the 
+FK column will be by the name "emp_id".
+
+
+
+
+
+eager and lazy loading:-
+----------------------------
+
+--by default ORM s/w perform lazy loading while fetching the objs, when we fetch the parent obj(first level obj),then only the first level obj related data will be loaded into the memory,but the 2nd level  obj related data will be loaded at time of calling the 2nd level object related methods.
+
+
+ex:-
+
+Demo1.java:-
+--------------
+
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+ 		Employee emp= em.find(Employee.class, 10);
+ 		
+ 		em.close();  // even though before closing the EM obj we got the Employee obj
+		//here only Employee related obj will be loaded ,address obj data will be not be loaded
+			//so while fetching the address related data we will get an exception
+		
+ 		System.out.println(emp.getEid());
+ 		System.out.println(emp.getEname());
+ 		System.out.println(emp.getSalary());
+ 		
+ 		System.out.println("All Address are:-");
+ 		
+ 		System.out.println("===========================");
+ 		Set<Address> addreses= emp.getAddresses();
+ 		
+ 		for(Address ad:addreses){
+ 			System.out.println("city :"+ad.getCity());
+ 			System.out.println("state :"+ad.getState());
+ 			System.out.println("Pincode :"+ad.getPincode());
+ 			
+ 			System.out.println("***************************");
+ 		}
+		
+		System.out.println("done...");
+	}
+
+}
+
+
+--to solve the above problem we need to use Eager loading:-
+
+ex:-
+
+Employee.java:-
+------------------
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int eid;
+	private String ename;
+	private int salary;
+	
+	@ElementCollection(fetch=FetchType.EAGER)
+	@Embedded
+	@JoinTable(name="empaddress",joinColumns=@JoinColumn(name="emp_id"))
+	private Set<Address> addresses=new HashSet<Address>();
+--
+--
+	
+}
+
+
+
+
+Association Mismatch:- table relationship problem:-
+=========================================
+
+
+--at the table level different types of tables will participate in different kind of relationships
+
+ex:-
+
+1.one to one (person ----- Driving licence) :- PK and FK(unique)
+
+2.one to many  (Dept ----Emp)  :- PK and FK (i.e PK of Dept will be inside the Emp as FK)
+
+3.many to many (student --- course) :- we need to take the help of 3rd table(linking table)
+
+
+
+---to access the meaningfull information from the multiple tables we need to establish the relationship.
+
+--these relationship enable us to navigate from one table record to another table records.
+
+--to navigate from one table to another table,our tables must be in a relationship.
+
+
+
+--when tables in the relationship then the Entity classes which represents the tables should also be in the relationships accordingly. so the objs of these classes should also be in a relationship .
+
+-- so we can navigate from one obj details to another obj details.
+
+
+--JPA supports the relationship bt the Entity classes not only with the cardinality but also with the 
+direction
+
+--uni-directional and bi-directional is the another classification of relationship.
+
+---in uni-direc, we can define child Entity obj inside the parent Entity , or parent Entity reff inside the 
+child Entity , but both are not possible.
+
+--with this relation, we can access the child class obj from parent obj or parent class obj from the 
+child class obj, both not possible at a time.
+
+--in bi-directional :- we define child Entity obj inside the parent Entity and parent Entity obj inside the 
+child Entity,(navigation is possible from the either one of the any obj)
+
+so JPA supports 4 types of relationships:-
+
+
+1.one to one
+2.one to many
+3.many to one
+4.many to many (it is by defualt bi-directional only)
+
+
+One-to-Many unidirectional:- (from Dept to Emp)
+-----------------------------------
+
+one Dept can have multiple Emp , 
+
+step 1:- here we need to develop child Entity class first as individual.(Employee Entity)
+
+step 2:- develop a parent Entity class with its own properties and declare one extra Collection type of Child 
+Entity class property (either List of child entity class or Set of child entity class).
+
+and apply @OneToMany annotation to this property ex:-
+
+
+	@OneToMany
+	private List<Employee> emps=new ArrayList<Employee>();
+
+
+Employee.java:-
+-------------------
+
+
+	@Entity
+	public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int empId;
+	private String name;
+	private int salary;
+	
+	--
+	--
+	}
+
+Department.java:-
+-----------------------
+
+
+	@Entity
+	public class Department {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int deptId;
+	private String dname;
+	private String location;
+	
+	//it is the extra property to maintain OTM relationship
+	@OneToMany
+	private List<Employee> emps=new ArrayList<Employee>();
+	--
+	--
+	}
+
+Demo.java:-
+---------------
+
+
+public class Demo {
+
+	public static void main(String[] args) {
+		
+	EntityManager em=EMUtil.provideEntityManager();
+		
+		
+	Employee emp1=new Employee();
+	emp1.setName("ram");
+	emp1.setSalary(8500);
+	
+	Employee emp2=new Employee();
+	emp2.setName("ramesh");
+	emp2.setSalary(7500);
+	
+	Department dept=new Department();
+	
+	dept.setDname("HR");
+	dept.setLocation("Kolkata");
+	
+	dept.getEmps().add(emp1);
+	dept.getEmps().add(emp2);
+	
+	
+	
+	em.getTransaction().begin();
+	
+	em.persist(emp1);
+	em.persist(emp2);
+	em.persist(dept);
+	
+	em.getTransaction().commit();
+	
+	em.close();
+	
+	System.out.println("done...");
+	
+	}
+}
+
+--with the above application, here for both the Entity classes 2 seperate tables will be created independently(they does not have info about each other.) , in addition to that one seperate linking table will be created which contains the PK of both the tables.
+
+this seperate table name and its column names are:-
+
+
+department_employee  :- table name
+	department_deptid  :- it reffers deptid of department table 
+	emps_empid;  :- it will reffers empid of employee table
+
+
+--in the above application we have saved first, all the child entity obj then we saved the parent entity obj.
+
+--but if we want that once we persist the parent obj, automatically all the child object also should be persisted, then we need to use cascading option:-
+
+ex:-
+
+
+	@OneToMany(cascade= CascadeType.ALL)
+	private List<Employee> emps=new ArrayList<Employee>();
+
+
+--we can change the 3rd generated table name as well as their column names also :-
+
+ex:-
+
+
+
+	@OneToMany(cascade= CascadeType.ALL)
+@JoinTable(name="dept_emp",joinColumns=@JoinColumn(name="did"),inverseJoinColumns=@JoinColumn(name="eid"))
+	private List<Employee> emps=new ArrayList<Employee>();
+	
+here the 3rd table name will become :- dept_emp;
+
+and both column names will be :-
+
+did(which reffers the PK of department table) and eid(which reffers PK of employee table)
+
+
+Note: - Department Entity class will take the help of this 3rd table to navigate the details of Employee Entity
+
+
+ex:- adding another employee in the exsisting department-
+-----------------------------------------------------------------
+
+Demo.java:-
+--------------
+
+
+
+public class Demo {
+
+	public static void main(String[] args) {
+		
+	EntityManager em=EMUtil.provideEntityManager();
+		
+	
+	Employee emp=new Employee();
+	emp.setName("Amit");
+	emp.setSalary(6500);
+	
+	Department dept= em.find(Department.class, 1);
+	
+	List<Employee> emps= dept.getEmps();
+	
+	em.getTransaction().begin();
+	
+	emps.add(emp);
+	
+	em.getTransaction().commit();
+	
+	
+	System.out.println("done...");
+	
+	}
+}
+
+Many to one (uni-directional):-
+------------------------------------
+
+--from Emp to Dept
+
+--in one to many we navigate from parent to child, whereas in many to one we navigate from child to parent.
+
+--MTO association means many obj of child Entity holds the single obj of parent Entity
+
+
+--here we need to take a Department class reference variable inside the Employee class and apply the @ManytoOne annotation.
+
+--and Department Entity class should not have any reff of Employee class, since it is a uni-direcitional.
+
+ex:-
+
+
+Department.java:-
+----------------------
+
+
+@Entity
+public class Department {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int deptId;
+	private String dname;
+	private String location;
+	
+	--
+	--
+	}
+
+
+Employee.java:-
+------------------
+
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int empId;
+	private String name;
+	private int salary;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Department dept;
+--
+	
+}
+
+Demo.java:-
+--------------
+
+
+public class Demo {
+
+	public static void main(String[] args) {
+		
+	EntityManager em=EMUtil.provideEntityManager();
+		
+	Department dept=new Department();
+	dept.setDname("Sales");
+	dept.setLocation("mumbai");
+	
+	Employee emp1=new Employee();
+	emp1.setName("ram");
+	emp1.setSalary(7800);
+	emp1.setDept(dept);
+	
+	Employee emp2=new Employee();
+	emp2.setName("ramesh");
+	emp2.setSalary(8850);
+	emp2.setDept(dept);
+	
+	
+	em.getTransaction().begin();
+	
+	em.persist(emp1);
+	em.persist(emp2);
+	
+	em.getTransaction().commit();
+	
+	System.out.println("done...");
+	
+	}
+}
+
+ 
+--here a seperate table will not be created, instead inside the child table one FK column will be created which will reffer the Department table PK.
+
+--here employee table is the owner of the relationship, 
+
+bydefault name of this FK will be "dept_deptid" with respect to above application.
+
+--if we want to change this name then we need to use 
+
+
+ex:-
+
+
+	@ManyToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name="did")
+	private Department dept;
+	
+
+getting the details of Department based on employee Id:-
+------------------------------------------------------------------
+
+
+	EntityManager em=EMUtil.provideEntityManager();
+		
+	
+	
+	Employee emp= em.find(Employee.class, 3);
+	
+	Department dept= emp.getDept();
+	
+	System.out.println(dept.getDeptId());
+	System.out.println(dept.getDname());
+	System.out.println(dept.getLocation());
+	
+
+
+One to Many (bidirectional):-
+----------------------------------
+
+--here we need to combine above both approach , i.e inside Dept class we need take the List<emp> variable and inside Emp class we need to take the Dept class simple variable
+
+--here we can apply cascading in both side.
+
+--while persisting the objs we need to associate both objs with each ohter. otherwise we will not get the desired result.
+
+ 
+ex:-
+
+Employee.java:-
+------------------
+
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int empId;
+	private String name;
+	private int salary;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Department dept;
+}
+
+
+
+Department.java:-
+-----------------------
+
+
+@Entity
+public class Department {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int deptId;
+	private String dname;
+	private String location;
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	private List<Employee> emps=new ArrayList<Employee>();
+--	
+}
+	
+
+Demo.java:-
+---------------
+
+
+public class Demo {
+
+	public static void main(String[] args) {
+		
+	EntityManager em=EMUtil.provideEntityManager();
+		
+	Department dept=new Department();
+	dept.setDname("Marketing");
+	dept.setLocation("Kolkata");
+	
+	Employee emp1=new Employee();
+	emp1.setName("Sunil");
+	emp1.setSalary(7800);
+	emp1.setDept(dept); //associating dept with emp1
+	
+	Employee emp2=new Employee();
+	emp2.setName("Suresh");
+	emp2.setSalary(8800);
+	emp2.setDept(dept); //associating dept with emp1
+	
+	//here both emp got the dept details..
+	
+	//now we need to give both emp details to the dept
+	//associating both emp with the dept
+	
+	dept.getEmps().add(emp1);
+	dept.getEmps().add(emp2);
+	
+	
+	em.getTransaction().begin();
+	
+	em.persist(dept);
+	
+	em.getTransaction().commit();	
+		
+	System.out.println("done...");
+	
+	}
+}
+
+
+--here one 3rd table will be created, by using this Dept Entity will get the details of Emp Entity.
+and one FK column will be generated inside the emp table by using this Emp Entity get the details of Dept.
+
+
+--in order to tell the ORM sw while navigating from Dept to Emp,don't use the 3rd linking table , relationship is already maintained inside the employee table , so instead of using 3rd table use the employee table reff we use "mappedBy" property inside the @OneToMany annotation with the value:- the variable defined in another side.
+
+
+
+Employee.java:-
+-----------------
+
+
+@Entity
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int empId;
+	private String name;
+	private int salary;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name="did")
+	private Department dept; //this variable is used in mappedBy of Department class
+	
+}
+
+Department.java:-
+---------------------
+
+
+	@Entity
+	public class Department {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int deptId;
+	private String dname;
+	private String location;
+	
+	@OneToMany(mappedBy="dept" ,cascade=CascadeType.ALL)
+	private List<Employee> emps=new ArrayList<Employee>();
+	
+--	
+}
+
+
+Demo.java:-
+---------------
+
+same as above app
+
+
+List out all the employees working in perticular dept:-
+----------------------------------------------------------------
+
+Demo.java:-
+---------------
+
+
+public class Demo {
+
+	public static void main(String[] args) {
+		
+	EntityManager em=EMUtil.provideEntityManager();
+		
+	Department d= em.find(Department.class, 1);
+	
+	List<Employee> emps= d.getEmps();
+	
+	emps.forEach(e ->{
+		
+		System.out.println(e.getEmpId());
+		System.out.println(e.getName());
+		System.out.println(e.getSalary());
+		
+	});
+	
+	System.out.println("done...");
+	
+	}
+}
+
+ManytoMany:-
+------------------
+
+
+ManyTOMany :- (it is binature a bidirectional association)
+===========
+
+
+
+--it is a combination of one-to-many association from parent and one-to-many association from child 
+
+--at table level,to establish a many-to-many relationship we need a third linking table.
+
+
+steps to achive the MTM relationship bt classes in HB:-
+------------------------------------------------------
+
+
+incase of MTM relationship we need to take both side collection properties and we need to apply @ManyToMany anno on the top of both side variables.
+
+ex:-
+
+
+public class Department
+{
+
+@ManyToMany
+List<Employee> empList = new ArrayList<>();
+--
+--
+
+}
+
+
+
+public class Employee
+{
+@ManyToMany
+List<Department> deptList = new ArrayList<>();
+
+}
+
+
+
+ex:-
+
+
+
+
+Department d1 = new Department();
+		d1.setDname("sales");
+		d1.setLocation("kolkata");
+
+
+		Department d2 = new Department();
+		d2.setDname("Marketing");
+		d2.setLocation("delhi");
+
+		
+		
+		
+		//creating employee without department
+		Employee emp1 = new Employee();
+		emp1.setEname("ram");
+		emp1.setSalary(50000);
+		
+		
+		Employee emp2 = new Employee();
+		emp2.setEname("dinesh");
+		emp2.setSalary(30000);
+		
+		//associating department with both employees(ram,dinesh) with dept sales
+		emp1.getDeptList().add(d1);
+		emp2.getDeptList().add(d1);
+		
+		//associating dept(sales) with both emp1 and emp2
+		
+		d1.getEmpList().add(emp1);
+		d1.getEmpList().add(emp2);
+		
+		
+		
+		//assume dinesh is working in 2 dept(sales and marketing)
+		emp2.getDeptList().add(d2);
+		d2.getEmpList().add(emp2);
+		
+		
+		
+		em.getTransaction().begin();
+		
+		em.persist(d1);
+		em.persist(d2);
+		
+		em.getTransaction().commit();
+
+		System.out.println("done");
+	}
+
+
+
+
+--here if we save the both the objs by associating them together then it will create total 4 tables
+
+department
+employee
+department_employee(Employee_empid, deptList_did)
+employee_department(Department_did,empList_empid)
+
+
+
+
+--in order to generate only one linking table then we need to use mappedBy property here also(in any side).
+
+ex:-
+
+
+
+@Entity
+public class Department {
+	
+	@ManyToMany(cascade = CascadeType.ALL,mappedBy = "deptList")
+	List<Employee> empList = new ArrayList<>();;
+	
+}	
+
+
+
+
+--here Employee obj doing the mapping not the Department obj.
+so only one linking table will be created by name employee_department.
+
+
+
+--here also we can mention the JoinTable name and joinColumn names,inverseColumn name ,this should be inside the Employee class.
+
+
+ex:-
+
+@Entity
+public class Employee {
+
+
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "emp_dept", joinColumns = @JoinColumn(name="empid"),inverseJoinColumns = @JoinColumn(name="deptid") )
+	private List<Department> depts;
+	
+}
+
+
+
+Navigating from emp to dept:-
+-----------------------------
+
+		List<Department> dlist =ses.get(Employee.class, 2).getDeptList();
+		
+		System.out.println(dlist);
+		
+		
+Navigating from dept to emp:-
+-----------------------------
+		
+
+		List<Employee> dlist =ses.get(Department.class, 1).getEmpList();
+		
+		System.out.println(dlist);
+		
+
+
+
+
+OneToOne:-
+=========
+
+--at table level,we can maintain OTO relation by taking FK as Unique
+
+
+
+
+
+
+unidirectional:-
+----------------
+
+
+
+--Assume one department has only one employee and one employee belongs from only one dept
+
+
+we can take other example also
+
+ex:-
+
+Emp --> Address
+
+Person --> DL
+
+--here we need to use @OneToOne annotation
+
+
+@Entity
+public class Department {
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	private Employee emp;
+
+}
+
+
+Main class:-
+------------
+
+
+		
+		
+		Department d1=new Department();
+		d1.setDname("Sales");
+		d1.setLocation("kolkata");
+	
+	
+		
+		
+		Employee emp = new Employee();
+		emp.setEname("Ram");
+		emp.setSalary(8500);
+		
+		d1.setEmp(emp);
+		
+		em.getTransaction().begin();
+		
+		em.persist(d1);
+		
+		em.getTransaction().commit();
+
+	
+		
+
+--here 2 table will be created 
+
+1.employee (empid,name,salary)
+
+2.department(did,dname,dlocation, emp_empid) (this emp_empid will be the FK)
+
+
+
+
+--if we want to change this auto generated FK column name then we need to apply @JoinColumn anno
+
+ex:-
+
+@OneToOne
+@JoinColumn(name="eid")
+private Employee emp;
+
+
+Note:- in the above application, we can create another dept and add the same emp again which is working in another dept, but it seems like a one to many relation,but it will be on the table level,at object level it is not an OTM, becoz we don't have List,and more ever we can not navigate from employee table to Department table.
+
+
+--and from Dept if we want to access or add any employee, we will get only one emp obj at any time.
+
+
+
+bidirectional:-
+--------------
+
+
+
+onetoone bidirectional :-
+-----------------------
+
+here on both side define opposit class variables:-
+
+ex:-
+
+Department:-
+	@OnetoOne
+	private Employee emp
+
+Employee:-
+	@OneToOne
+	private Department dept
+
+
+
+ex:-
+
+
+		
+		
+		Department d1=new Department();
+		d1.setDname("Sales");
+		d1.setLocation("kolkata");
+	
+		
+		Employee emp = new Employee();
+		emp.setEname("Ram");
+		emp.setSalary(8500);
+		
+		d1.setEmp(emp);
+		emp.setDept(d1);
+		
+		
+		em.getTransaction().begin();
+		em.persist(d1);
+		em.getTransaction().commit();
+		
+		System.out.println("done..");
+
+--in this case 2 table will be created both will containes the id of each other as FK as an extra column.
+
+
+department:-(emp_empid as FK)
+
+employee:- (dept_did as FK)
+
+
+
+--if we want that only one table should maintains the FK col then we use mappedBy on any side.
+
+ex:-
+
+
+Department:-
+   
+    @OneToOne(mappedBy = "dept")
+	private Employee emp;
+
+
+--here Employee class maintains the FK id by name dept_did
+
+
+--if we want to change this FK column name then 
+
+
+	@OneToOne
+	@JoinColumn(name = "did_FK")
+	private Department dept;
+
+
+ex:-
+
+Navigating from dept to emp:-
+-----------------------------
+
+
+		
+	 Department d= em.find(Employee.class, 2).getDept();
+		
+		System.out.println(d);
+		
+
+

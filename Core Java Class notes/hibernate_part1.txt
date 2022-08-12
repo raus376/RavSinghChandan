@@ -1,0 +1,741 @@
+Developing Data Access Layer using ORM approach:-
+---------------------------------------------------------------
+
+Java persistence:-
+---------------------
+
+--the process of saving/storing java objs state into the DB s/w is known as java persistence..
+
+--for small application we can store business data (java object state ) in the files using IO streams (serialization and deserailization approach).
+
+--the logic that write to store java objs(which is holding business data ) into the file using IO Streams is known as
+ "IO stream based persistence logic".
+
+--but in the realtime application, we store/save/persist the business data inside the database using JDBC
+
+public String saveStudentDetails(Student student)
+
+--the logic that we write to store java objs data into the DB using JDBC is known as "jdbc based persistence logic"
+
+
+limitation of JDBC based persistence logic:-
+----------------------------------------------------
+
+
+1.jdbc can't store the java objs into the table directly,becoz sql queires does not allows the java objs as input, 
+here we need to convert obj data into the simple(atmoic) value to store them in a DB.
+
+
+
+2.jdbc code is the DB dependent code becoz it uses  DB s/w dependent queries. so our jdbc based persistence logic is not 100% portable across various DB s/w.
+
+
+3.jdbc code having boiler plate code problem (writing the same code except sql queries in multiple classes of our application again and again)..
+
+4.jdbc code throws lots of checked exceptions, programmer need to handle them.
+
+
+5.After the select operation, we get the ResultSet object.this RS obj we can not 
+transfer from one layer to another layer and to get the data from the ResultSet we need to now the structure of the ResultSet.
+
+6.there is no any caching and transaction management support is available in jdbc.
+
+etc ...
+
+
+--to overcome the above limitations we need to use ORM approach.
+
+ORM (Object - ralation mapping):-  Java---->   relation
+============================
+--the process of mapping java classes with the DB tables ,, java class member variables with the DB table columns and 
+making the object of java class reperesents the DB table records having synchronization bt them is called a OR mapping.
+
+Student object----------->row of the  student table 
+
+-here synchronization bt obj and table row is nothing but, the modification done in the obj will reflect the DB table row and vise-versa.
+
+***the logic that we write to store java objs into the DB using ORM approach is called as ORM based persistence logic.
+
+--there are variaous ORM s/w are available in the market, these s/w will act as f/w software to perform ORM based persistence logic. 
+
+ex:-
+
+Hibernate 
+Toplink
+Ibatis,
+etc...
+
+
+
+f/w software :- 
+----------------
+
+--it is a special type of s/w that provides abstraction layer on one or more existing core technology to simplyfy the process of application development.
+
+--in java most of  the f/w softwares comes in the form of jar files(one or more jar file)
+
+--in order to use/work on these f/w softwares we need to add those jar files in our classpath.
+
+
+--while working with the ORM based persistence logic we write all the logics in the form of objs without any sql quiery support.
+ due to which our logic will become DB s/w independent logic.
+
+
+--In ORM based logic, the ORM s/w takes objs as an input and gives objs as an output so no need to convert object data to the primitive values.
+
+
+--ORM s/w addresses the mismatches bt object oriented representation of data and relational representation of data.
+
+
+
+
+1.inheritence mismatches / IS-A mismatch
+
+2.Granularity mismatch / has-A mismatch
+
+3. assotiation mismatch / table relation mismatch 
+
+i.e for processing and presenting the data, we represent the data in form of ObjectOriented fashion
+whereas for storing the data we represnet the data in the form of relational fashion(in the tables)
+
+
+
+
+class Student{
+
+int roll,
+String name,
+int marks,
+Address addr; (city,state,pin)
+
+}
+
+class Course{
+
+
+}
+
+
+
+student table :- 
+
+roll int
+name varchar
+marks int 
+
+course table :-
+
+
+
+
+--one obj of Student class will represnt one row of student table
+
+ORM s/w addresses these mismathces in very easy manner.
+
+
+
+
+POJO class:-
+---------------
+
+Plain old java object
+
+--it is a normal java class not bounded with any technology or f/w s/ws.
+i.e a java class that is not implementing or extending technology/framework api related 
+classes or interfaces.
+
+--a java  class that can be compiled without adding any extra jar files in the classpath are known
+as a POJO class.
+
+POJI (plain old java interface )
+
+Note:- every java bean class is a POJO but every POJO is not a  java bean.
+
+public class X {
+
+public X(int x){
+
+}
+
+} 
+
+--above class is a POJO class but it is not a java bean class.
+
+
+
+ORM s/w features:-
+===============
+
+1.it can persist/store java obj to the DB directly.
+
+2.it supports POJO and POJI model
+
+3.it is a lightweight s/w becoz to excute the ORM based application we need not install any kind of servers.
+
+4.ORM persistance logic is DB independent. it is portable accross multiple DB s/ws.
+(beocz here we deal with object, not with the sql queires)
+
+5.prevent the developers from boiler plate code coding to perform CRUD operarions.
+
+6.it generates fine tuned sql statements internally that improves the performance.
+
+7.it provides caching mechanism (maintaing one local copy to inhance the performance)
+
+8.it provides implicit connection pooling.
+
+9.exception handling is optional becoz it throws unchecked exceptions.
+
+10.it has a special Query language called JPQL (JPA query language ) that totally depends upon the '
+objects.   select eid,ename from employee.
+
+
+Hibernate and JPA:-
+-----------------------
+
+Hibernate:- it is one of the ORM based framework s/w.  other s/w are :- toplink,ibatis,etc..
+
+JPA:- (Java persistence api) :- it is an open specification given by Oracle corp,  to develop any ORM based s/w .
+
+JPA provides a standard api to work with any kind of ORM based s/w .
+
+JPA api belongs from "javax.persistence" package.
+
+--Hibernate is one of the most frequently used JPA implementation
+
+--HB provides its own api to develop ORM based persistence logic , if we use those api then
+our application will become vendor lock, ie we can not port our application accross multiple 
+ORM s/w. 
+
+--HB api comes in the form of "org.hibernate" package.
+
+
+Note:- we get the JPA api , along with any ORM s/w , becoz all the ORM s/w implements 
+JPA specification.
+
+java.sql
+javax.sql   this jdbc api comes along with jdk installation
+
+
+Jpa with hibernate:-
+-------------------------
+
+JPA Application:-
+---------------------
+
+any java application, that uses JPA api to perform persistnce operation (CRUD ) operation with 
+the DB s/w is called as JPA application.
+
+JPA architecture:-
+--------------------
+
+
+
+
+
+
+Entity class or persistence class:-
+--------------------------------------
+
+--if we are using the annotaion, then we need not map this class with the table inside the xml mapping file.
+
+--an Entity class or persistence class is a java class that is developed corresponding to a table of DB.  
+
+--this class has many instance variables should be there as same as columns in teh corresponding table
+
+--we should take Entity class as a POJO class.
+
+--we need to provide mapping information with the table in this class only using annotaitons.
+
+Note:- when we gives this persistance /Entity class obj to the ORM s/w, then ORM s/w will 
+decide the destination DB s/w based on the configuration done in a xml file which is called as hibernate-configuration file.
+
+
+Configuration file:-
+-----------------------
+
+--it is an xml file its name is "persistence.xml".
+
+--this file must be created under src/META-INF folder in normal java application, 
+where as in maven or gradle based application this file should be inside the src/main/resources/META-INF folder
+
+
+--this file content will be used by ORM s/w (ORM engine) to locate the destination DB s/w.
+
+--in this file generally 3 types of details we specify:-
+
+1.DB connection details
+
+2.ORM specific details (some instruction to the ORM s/w like dialect info,show_sql ,etc)
+
+3. annotation based entity/persistence class name.
+
+Note:- generally we take this file 1 per DB basis.
+
+--we should always create this configuration file by taking support of example applications inside 
+the project folder of hibernate download zip file or by taking the reffernce from the Google.
+ex:-
+
+persistence.xml:-
+--------------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+
+    <persistence-unit name="studentUnit" >
+
+	<class>com.ratan.Student</class>        
+
+<properties>
+         
+           <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+          <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ratandb" />
+            <property name="javax.persistence.jdbc.user" value="root" />
+            <property name="javax.persistence.jdbc.password" value="root" />
+          
+   
+        </properties>
+    </persistence-unit>
+</persistence>
+
+
+
+the root tag is :-
+
+<persistence> with some xml-namespace 
+
+--the child tag of <persistence> tag is <persistence-unit>
+
+--this <persistence-unit> has 2 child tags:-
+
+1. <class> tag ,:-using which we specify the Entity class name(fully qualified name) that used 
+annotations to map a table
+
+2.<properties> tag :- using this tag,we specify some configuration details to the ORM s/w
+
+
+Persistence-unit:- it is a collection of Entity/Persistence class instance reffered by a unique 
+user-defiend name
+
+
+ORM engine :- 
+-----------------
+
+--it is a specialized s/w written in java that performs translation of jpa calls into the sql call by using mapping annotation and configuration
+ file details and send the mapped sql to the DB s/w using JDBC.
+
+--ORM engine is provided by any ORM s/w.
+
+steps to devlop the JPA application:-
+--------------------------------------------
+
+1.create a maven project and add the hibernate-core dependency to the pom.xml.
+
+2.add jdbc driver related dependency to the pom.xml
+
+3.create a folder called "META-INF" inside src/main/resources folder, and create the "persistence.xml" file inside this folder
+ by taking reference from Hibernate docs or from google.
+
+step 4:- create as many  Entity/Perssitence  classes  as there r tables in the DB, apply the at least 2 annotations to these classes 
+
+
+@Entity :- on the top of the class
+@Id  :- on the top of PK mapped variable
+
+--if we apply above 2 annotations then our java bean class will become Entity or Persistence class.
+
+--inside these classes , we need to take variable corresponding to the columns of the tables.
+
+
+step 5:- create a client application and activate ORM engine by using JPA api related following classes and interface and perform the DB operations.
+
+1.Persistence class 
+
+2.EntityManagerFactory
+
+3.EntityManager
+
+
+--if we use Hibernate core api then we need to use 
+
+Configuration class
+
+SessionFactory(I)
+
+Session(I)
+
+
+
+
+
+Note:- when we call createEntityManagerFactory(-) method by suppliying persistence-unit name 
+on the Persistence class,we will get the EntityManagerFactory object.
+
+--this method loads the "persistence.xml" file into the memory
+
+--EntityManagerFactory obj should be only one per application per DB.
+
+this EMF obj contains :-
+
+connection pool,
+
+some meta information
+
+--by using this EMF class only we create the EntityManager object.
+
+EntityManager em= emf.createEntityManager();
+ 
+Note:- inside every DAO method we need to get the EntityManager obj
+
+
+JPA application ----------------->EntityManager --------------------->ORM engine ------>JDBC------------>DB s/w
+
+
+--in order to perform any DML (insert update delete ) the method calls should be in a transactional area.
+
+
+ em.getTransaction(); method return "javax.persistice.EntityTransaction(I) " object.
+
+this EntityTransaction obj is a singleton object, i.e per EntityManager obj, only one Transaction object is created.
+
+--to store the object we need to call persist(-) method on the EM object.
+
+--to get the Object from the DB we need to call :- find(--) method of EM object
+
+this find(--) method takes 2 parameter 
+
+1.the Classname of the Object which we want,
+
+2.the ID value for which we want the object.
+
+
+ex:-
+
+
+Main.java:- for Read object
+--------------
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		EntityManagerFactory emf=Persistence.createEntityManagerFactory("studentUnit");
+		
+		EntityManager em= emf.createEntityManager();
+		
+		Student s= em.find(Student.class, 60);
+	
+		if(s != null)
+			System.out.println(s);
+		else
+			System.out.println("Student does not exit..");
+		 
+		em.close();
+		
+	}
+
+}
+
+
+Main.java :-(insert object)
+------------------------------
+
+
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		EntityManagerFactory emf=Persistence.createEntityManagerFactory("studentUnit");
+		
+		EntityManager em= emf.createEntityManager();
+		
+		Student s = new Student(35, "Arun", 780);
+		
+	/*	EntityTransaction et= em.getTransaction();
+		
+		et.begin();
+		
+		em.persist(s);
+		
+		et.commit();
+	*/	
+	
+		em.getTransaction().begin();
+		
+		em.persist(s);
+		
+		em.getTransaction().commit();
+		
+		em.close();
+		
+		System.out.println("done");
+		
+		
+	}
+
+}
+
+Main.java:- Delete:-
+-------------------------
+
+
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		EntityManagerFactory emf=Persistence.createEntityManagerFactory("studentUnit");
+		
+		EntityManager em= emf.createEntityManager();
+		
+	
+		Scanner sc=new Scanner(System.in);
+		
+		System.out.println("Enter roll to delete ");
+		int roll=sc.nextInt();
+		
+		Student student= em.find(Student.class, roll);
+		
+		if(student != null){
+			
+			em.getTransaction().begin();
+			
+			em.remove(student);
+			
+			em.getTransaction().commit();
+			
+			
+			System.out.println("Student removed....");
+			
+		}else
+			System.out.println("Student not found...");
+		
+		em.close();
+		
+		
+		System.out.println("done");
+		
+		
+	}
+
+}
+
+
+Main.java :- Update the marks:-
+===========================
+
+
+
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		EntityManagerFactory emf=Persistence.createEntityManagerFactory("studentUnit");
+		
+		EntityManager em= emf.createEntityManager();
+		
+	
+		Scanner sc=new Scanner(System.in);
+		
+		System.out.println("Enter roll to give grace marks ");
+		int roll=sc.nextInt();
+		
+		Student student=em.find(Student.class, roll); //if it returns the obj then the obj will be in p.state
+		
+		
+		if(student == null){
+			System.out.println("Student does not exist..");
+		}
+		else
+		{
+			
+			System.out.println("Enter the grace marks");
+			int marks=sc.nextInt();
+			
+			em.getTransaction().begin();
+			
+			student.setMarks(student.getMarks()+marks);
+			
+			em.getTransaction().commit();
+			
+			System.out.println("Marks is graced...");
+			
+		}
+		em.close();
+	
+		System.out.println("done");
+		
+		
+	}
+
+}
+
+
+--in the above application we didn't call any update method, we just change the state of the persistence/entity  obj
+inside the transactional area, at the end of the tx , ORM engine will generate the update sql.
+
+--this is known as the ORM s/w maintaining synchronization bt entity obj and the db table records.
+
+--we have a method called merge() inside the EntityManager obj to update a record also.
+
+
+
+Life-cycle of persistence/entity object:-
+-----------------------------------------------
+
+an entity has the 3 life-cycle state:-
+
+1.new state/transient state
+
+2.persistence state/managed state
+
+3.detached state
+
+
+1.new state/transient state:- 
+------------------------------------
+
+--if we create a object of persistence class and this class is not attached with the EM obj, then
+this stage is known as new state/transient state
+
+Student s=new Student(10,"ram",780);
+
+
+2.persistence state:- 
+-------------------------
+
+--if a persistence class obj is associated with EM obj, then this obj will be in persistence state.
+
+ex:-
+
+when we call a persist(-) method by supplying Student entity obj then at time student obj will be in persistence state
+
+or 
+
+when we call find() method and this method returns the Student obj, then that obj will also be in persistence state.
+
+Note:- when an entity class obj is in persisitence state ,it is in-sync with the DB table ,i.e 
+any change made on that obj inside the tx area will reflect to the table automatically.
+
+
+ex:-
+
+
+
+		Student s=new Student(150,"manoj",850); // here student obj is in transient state .
+		
+		em.getTransaction().begin();
+		
+		em.persist(s); // here it is in the persistence state
+		
+		s.setMarks(900);
+		
+		
+		em.getTransaction().commit();
+		
+
+detached state:-
+-------------------
+
+--when we call  close() method   or call clear() method on the EM obj, then all the associated entity obj will be in detached state.
+
+--in this stage the entity objs will not be in-sync with the table.
+
+
+
+Note:- we have a merge() method in EM obj, when we call this method by supplying any detached object then that detaced object will bring back in the persistence state.
+
+
+
+ex:-
+
+
+Main.java:-
+-------------
+
+
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		EntityManagerFactory emf=Persistence.createEntityManagerFactory("studentUnit");
+		
+		EntityManager em= emf.createEntityManager();
+		
+		Student s= em.find(Student.class, 20); //persistence state
+		
+		em.clear(); //detached state
+		
+		em.getTransaction().begin();
+		
+		s.setMarks(500);
+	
+		//em.persist(s);// it will throw duplicate ID related exception
+		em.merge(s); //persistence state
+	
+		em.getTransaction().commit();
+		
+	
+		System.out.println("done");	
+	}
+}
+
+
+em.persist()
+em.find()------------>persistence state-----------em.close(), em.clear()--------->detached state---->em.merge()--->persistence state
+
+
+
+
+Note:- to see the ORM tool(HB) generated sql queries on the console add the following property inside the persistence.xml
+
+  <property name="hibernate.show_sql"  value="true"/>
+
+
+         
+
+to create or update the table according to the entity class mapping information:-
+
+   <property name="hibernate.hbm2ddl.auto"  value="create"/>
+                   
+create :- drop the existing table then create a fresh new table and insert the record.
+
+update :- if table is not there then create a new table, and if table is already there it will perform insert operation only in the existing table.
+
+
+           
+
+some of the annotations of JPA:-
+------------------------------------
+
+@Entity :- to make a java bean class as entity , i.e to map with a table
+
+@Id :- to make a field as the ID field (to map with PK of a table)
+
+@Table(name="mystudents") :- if the table name and the class name is different
+
+@Column(name="sname") :- if the column name of table and corresponding variable of the class is diff.
+
+
+Generators in JPA:-
+----------------------
+
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int roll;
+
+
+--here roll will be generated automatically for each row.
+
+Note:- if we use this @GeneratedValue annoation then we are not allowed to give the roll explicitly while inserting a record.
+
+AUTO :- internally underlaying ORM s/w creates a secquence or a table called "hibernate_sequence" to maintain the Id value.
+
+IDENTITY :- it is used for auto_increatement feature to auto generate the id value
+
+SEQUENCE :- it is used for sequence feature to auto generate the id value
+
+

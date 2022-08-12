@@ -1,0 +1,353 @@
+Java mostly used to develop business application:
+
+---business orgnization ----> 1990 
+
+small scale BO (provide the services to the limited area) 
+large scale BO  (provide their services to the large scale )  : Enterprise (Banks, Hospital, Insurance, Railways )
+
+business application : common general things required for a business application:
+
+1. maintaining business data permanently in a secure and easily retrival manner.
+
+2.processing the business data according to the business rules.
+
+3.presenting the data to end-user in user understandable format.
+
+in reatime we maintain the business data in RDBMS(Ralational data base management system) s/w
+
+mysql ----------> (We are going to use this only-free!)
+oracle
+postgresql
+db2
+sql server
+
+
+----RDBMS s/w manages the data in the form of tables
+
+
+SQL (structured query language): --this language is used to intract with the DB s/w.
+
+The SQL commands divided into following categories:
+
+1. DDL command (Data Definataion language) (create, alter, drop)
+
+2.DML (Data manipultion language) (insert, update, delete)
+
+3.DRL (Data Retrival language) (select)
+
+4.TCL (Transaction control language) (commit, rollback, savepoint)
+
+
+Mysql is a RDBMS s/w, where we can manage multiple databases.
+
+--first we need to create  a database ..and inside the database we need to create tables.
+
+--and inside the table we need to maintain our data.
+
+
+>show databases;
+
+>create database web16db;
+
+--after database creation we need to connect to the appropriate DB.
+
+>use web16db;    //to connect with the DB
+
+>show tables;  //to list out all the tables in that perticular DB.
+
+>drop table student;
+
+create table student
+(
+roll int,
+name varchar(12),
+marks int
+);
+
+> desc student;
+
+
+
+1.numeric ( tinyint(1byte--> -128 to 127), 
+smallint (2 byte)
+ mediumint (3 byte)
+ int(4 byte), bigint(8byte), 
+for floating number  float(6,2)
+  6 digit with 2 decimal places)
+
+2.string ( char(4), varchar(12))
+3. date and time (date (yyyy-mm-dd) , datetime(yyyy-MM-dd hh:mm:ss))
+
+
+'a'  --4 byte
+
+abcd-- 4 byte
+
+abcde --error
+
+a --1 byte
+abcde --5 byte
+
+
+DML and DRL operation :
+-------------------------------
+
+>select * from student;
+
+>insert into student values(10,'ram',780);
+
+--to insert partial data :
+
+>insert into student(roll,name) values(14,'rahul');
+
+applying conditions: we need to use where clause to apply restriction on number of rows.
+
+operators: 
+--------------
+
+1. Arithmatic operators( *, /, +, - )    :most of the time arithmatic operator used with select clause, and remaining operators are used in where clause.
+
+2. relational operators (= < > <= >= != <>)
+
+3.logical operators: (AND OR NOT)
+
+4.special operators (IN, NOT IN, BETWEEN, LIKE , IS NULL, IS NOT NULL)
+
+
+>select * from student where marks IS NULL;
+
+
+update:
+---------
+
+>update student set marks = marks + 50;    // to update all the records
+
+>update student set marks = marks + 50 where name = 'ram';  // to update only specific record.
+
+
+delete: 
+---------
+
+>delete from student;   // all the row will be deleted.
+
+> delete from student where marks IS NULL;  // delete only specific record.
+
+ifNull():
+---------
+
+>update student set marks = ifNull(marks,0)+ 50;
+
+get the details of all the students whose roll should be either 10, 12, 14
+
+IN ---> NOT IN
+
+BETWEEN --> NOT BETWEEN
+
+IS NULL --> IS NOT NULL
+LIKE ---> NOT LIKE
+
+LIKE operator is used to retrive the data based on the charecter pattern.
+
+1. %  (string or group of charecter)
+
+2. _ (single charecter)
+
+>select * from student where name LIKE 'a%';  
+
+>select * from student where name LIKE '%a%';
+
+
+Constraints:
+----------------
+
+it prevents invalid data entry into our table.
+
+--constraints are created on the columns
+
+not null : null value will not allowed.
+
+unique : no duplicate value to that column, you can add null value also, on a single table we can have more than one column as unique.
+
+PK: not null + unique  (on a single table we can have only one PK which will identify the one row uniquely)
+
+on a table for that column  B tree index will be created. which will improve the search condition.
+
+
+DBA -----> ER diagram  () :  CRUD operation (insert/create record   R retreive a record  )
+
+
+
+FK
+
+--these constraints can be applied while defining the table structure (table creation time)
+
+or we can alter and add the contstraints on a perticulr column.
+
+
+create table employee
+(
+empid int primary key,
+ename varchar(12) not null,
+address varchar(12) unique,
+salary int not null
+);
+
+
+Foreign key:
+--------------
+
+with the help of FK we inforce referential intigrity
+
+--using FK we establish the relationship among 2 tables
+
+one table PK must belongs to another table FK
+
+single table:
+
+emp_details + depart_details (multiple columns)
+
+normalize the table 
+
+(1st normal form)
+2nd normal form
+
+--if multiple tables are in the relationship using FK then we can get the meaningfull info from those tables by using joins
+
+
+
+create table dept
+(
+deptid int primary key,
+dname varchar(12),
+loacation varchar(12)
+);
+
+create table employee
+(
+empid int primary key,
+ename varchar(12),
+address varchar(12),
+salary int,
+did int, foreign key(did) references dept(deptid)
+);
+
+
+
+inner join:  it will get the common data from multiple tables:
+
+select e.empid, e.ename, e.address, e.salary, d.deptid, d.dname, d.loacation from dept d JOIN employee e ON e.did=d.deptid AND d.dname = 'Account';
+
+or 
+
+select e.empid, e.ename, e.address, e.salary, d.deptid, d.dname, d.loacation from dept d,employee e where  e.did=d.deptid AND d.dname = 'Account';
+
+
+java  app ------   JDBC   ---------DB s/w 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+  
+
+
+
+

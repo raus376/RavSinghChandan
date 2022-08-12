@@ -1,0 +1,380 @@
+Inheritence Mapping:-
+=====================
+
+--In DataAccessLayer,between persistent class IS-A relationship is posibly exist.
+
+--but in DB we don't have IS-A relationship between corresponding tables.
+
+
+--to solve this problem we use inheritence mapping in HB.
+
+
+Jpa supports inheritence mapping with 3 strategy:-
+
+
+1.one table for entire hirarchy/Single table.
+
+2.table per sub-classes/Joined Table
+
+3.Table per concreate class/ Table Per class:-
+
+
+1.one table for entire hirarchy/Single table:
+----------------------------------------------------
+
+--this strategy is the default strategy in HB to perform the inheritance mapping
+
+
+here we will take a single table with  the all the columns, corresponding to generalized properties of super class and specialized properties for all the sub classes and one extra discriminator column.
+
+--with the help of this descriminator value DB table maintains which Entity class of the inheritence hirarcy  inserting the record.
+
+
+Example:
+
+Employee.java:-
+--------------
+
+
+
+@Entity
+@Inheritence(strategy=InheritenceType.SINGLE_TABLE) // this line is optional, it is the default strategy
+public class Employee {
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int eid;
+	private String name;
+
+//getters and setters
+
+
+}
+
+
+
+
+ContractualEmployee.java:-
+--------------------------
+
+@Entity
+public class ContractualEmployee extends Employee{
+
+	private int noOfWorkingDays;
+	private int costPerDay;
+	
+//setters and getters
+
+}
+
+
+
+SalariedEmployee.java:-
+--------------------
+
+@Entity
+public class SalaryEmployee extends Employee{
+
+	private int salary;
+
+//setters and getters
+
+}
+
+
+
+Demo.java:-
+--------------
+		
+		Employee emp=new Employee();
+		emp.setName("Ram");
+		
+		
+		SalariedEmployee semp=new SalariedEmployee();
+		semp.setName("Mohan");
+		semp.setSalary(85000);
+		
+		ContractualEmployee cemp=new ContractualEmployee();
+		cemp.setName("Hari");
+		cemp.setCostPerDay(3000);
+		cemp.setNoOfWorkingDays(10);
+		
+		em.getTransaction().begin();
+		em.persist(emp);
+		em.persist(semp);
+		em.persist(cemp);
+		em.getTransaction().commit();
+		
+		System.out.println("done");
+
+
+--here one single table is created with all columns (for all the properties of super class Entity and all the proeperties of all the sub class Entities) plus one extra column DTYPE, which represents which class has made the entry. 
+
+--we can change this DTYPE column name and its corresponding value as follows:
+
+
+@Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE) 
+@DiscriminatorColumn(name="emptype",discriminatorType=DiscriminatorType.STRING)
+@DiscriminatorValue(value="emp")
+public class Employee {
+
+	int id;
+	String name;
+
+//setters and getters
+	
+}
+
+
+
+ContractualEmployee.java:-
+--------------------------
+
+@Entity
+@DiscriminatorValue(value="contEmp")
+public class ContractualEmployee extends Employee{
+
+
+	private int noOfWorkingDays;
+	private int costPerDay;
+	
+//setters and getters
+
+}
+
+
+
+SalariedEmployee.java:-
+--------------------
+
+
+@Entity
+@DiscriminatorValue(value="salEmp")
+public class SalariedEmployee extends Employee{
+
+	private int sal;
+
+//setters and getters
+
+}
+
+		
+		
+
+
+
+Note:-the limitation of the above strategy is :-
+
+1.designing a table with huge number of column is not recomended,against the rule of normalizations.
+
+2.with the above strategy,we can not apply not null to the coulmns
+
+
+2.Table per sub-classes strategy/Joined Table:-
+====================================
+
+--in this,every Entity class of inheritence hirarchy will have its own table and these table will participate in relationship,that means every record of child table will represent one record of parent table. 
+
+--in this mode of inheritence mapping,each child record of child table maintains association with a record of parent table .
+
+--inside all the child tables we should have a FK column that reffers Pk column of parent table.
+
+
+
+--while saving data by using child class obj,the common properies data will be saved to parent table and child class properties will be saved in child table.
+
+
+
+
+Adv of table per subclasses strategy:-
+-------------------------------------------
+
+
+1.DB tables can be designed by satisfying normalization forms/rules.
+
+2.no need to take any discriminator value.
+
+3. not null constraint can be applied.
+
+
+
+
+
+
+@Inheritence(strategy=InheritenceType.JOINED) to mention table per child class
+
+@PrimaryKeyJoinColumn(name="PKid") to modify the FK coulmn name in the child class 
+
+
+
+Example:
+
+Employee.java:-
+------------------
+
+@Entity
+@Inheritance(strategy=InheritanceType.JOINED)
+public class Employee {
+
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int empId;
+	
+	
+	private String name;
+
+
+ContractualEmployee.java:-
+---------------------------------
+
+
+@Entity
+@PrimaryKeyJoinColumn(name="eid")
+public class ContractualEmployee extends Employee {
+	
+	private int noOfWorkingDays;
+	private int costPerDay;
+	
+
+}
+
+SalariedEmployee.java
+----------------------------
+
+
+@Entity
+@PrimaryKeyJoinColumn(name="eid")
+public class SalariedEmployee extends Employee{
+
+	private int salary;
+
+}
+
+
+
+3.Table per concreate class/ Table Per class:-
+=================================
+
+
+
+
+--in this strategy,every Entity class of inheritence hirarcy will have its own DB table these tables need not stay in relationship.
+
+--in this strategy all the child class corresponding tables has all the column of its super class coresponding columns also.
+for ex:-
+
+class Employee(id,name)--->employee(id,name);
+
+class SalariedEmployee extends Employee(salary)------->semployee(id,name,salary);
+
+class ContractualEmployee extends Employee(noOfWorkingDays,costPerDay)---
+------->cemployee(id,name,noOfWorkingDays,costPerDays);
+
+
+
+--due to this,same column of parent table will be repeated inside the child table.
+
+
+Example:
+
+
+Employee.java:-
+-------------
+
+@Entity
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+public class Employee {
+
+	@Id
+	@GeneratedValue
+	private int empid;
+
+	private String name;
+
+
+}
+
+ContractualEmployee.java:-
+-------------------------
+
+
+
+@Entity
+public class ContractualEmployee extends Employee{
+	
+	private int noOfWorkingDays;
+	private int costPerDay;
+	
+}
+
+
+
+
+SalariedEmployee.java:-
+-----------------------
+
+
+@Entity
+public class SalariedEmployee extends Employee{
+	
+	private int salary;
+	
+}
+
+
+
+There is another category called MappedSuperclass:-
+--------------------------------------------------------------
+
+
+--Using the MappedSuperclass strategy, we can save only child class object, (here all the data of the child Entity and inherited data of the parent class will be persisted).
+
+--in this strategy parent class will not be an Entity, it will be a normal java class.
+
+
+Example
+
+Employee.java:-
+------------------
+
+
+@MappedSuperclass
+public class Employee {
+
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int empId;
+	
+	
+	private String name;
+}
+
+
+Demo.java:-
+--------------
+
+		//This emp is not an Entity so it can't be persisted
+		Employee emp=new Employee();
+		emp.setName("Ram");
+		
+		
+		SalariedEmployee semp=new SalariedEmployee();
+		semp.setName("Mohan");
+		semp.setSalary(85000);
+		
+		ContractualEmployee cemp=new ContractualEmployee();
+		cemp.setName("Hari");
+		cemp.setCostPerDay(3000);
+		cemp.setNoOfWorkingDays(10);
+		
+		em.getTransaction().begin();
+		//em.persist(emp);
+		em.persist(semp);
+		em.persist(cemp);
+		em.getTransaction().commit();
+		
+		System.out.println("done");
+		

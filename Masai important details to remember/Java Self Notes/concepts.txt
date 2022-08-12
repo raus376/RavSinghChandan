@@ -1,0 +1,835 @@
+  
+Hibernate
+=========
+ 
+for processing and presenting the data, we represent the data in form of ObjectOriented fashion
+whereas for storing the data we represnet the data in the form of relational fashion(in the tables)
+
+
+one obj of Student class will represnt one row of student table
+
+Note:- every java bean class is a POJO but every POJO is not a  java bean.
+
+Hibernate:- it is one of the ORM based framework s/w.  other s/w are :- toplink,ibatis,etc..
+
+JPA:- (Java persistence api) :- it is an open specification given by Oracle corp,  to develop any ORM based s/w .
+JPA provides a standard api to work with any kind of ORM based s/w .
+
+JPA api belongs from "javax.persistence" package.
+
+Hibernate is one of the most frequently used JPA implementation
+-HB api comes in the form of "org.hibernate" package.
+
+Note:- we get the JPA api , along with any ORM s/w , becoz all the ORM s/w implements 
+JPA specification.
+
+Note:- when we give this persistance /Entity class obj to the ORM s/w, then ORM s/w will 
+decide the destination DB s/w based on the configuration done in a xml file which is called as hibernate-configuration file.
+
+
+
+we should always create this configuration file by taking support of example applications inside 
+the project folder of hibernate download zip file or by taking the reffernce from the Google.
+ex:
+
+Persistence-unit:- it is a collection of Entity/Persistence class instance reffered by a unique 
+user-defiend name
+
+
+Note:- when we call createEntityManagerFactory(-) method by suppliying persistence-unit name on the Persistence class,we will get the EntityManagerFactory object.
+
+--this method loads the "persistence.xml" file into the memory
+
+--EntityManagerFactory obj should be only one per application per DB.
+
+this EMF obj contains :-
+
+connection pool,
+
+some meta information
+
+--by using this EMF class only we create the EntityManager object.
+
+
+EntityManager em= emf.createEntityManager();
+
+ 
+Note:- inside every DAO method we need to get the EntityManager obj
+
+JPA application ----------------->EntityManager --------------------->ORM engine ------>JDBC------------>DB s/w
+
+
+--in order to perform any DML (insert update delete ) the method calls should be in a transactional area.
+
+
+-in the above application we didn't call any update method, we just change the state of the persistence/entity  obj
+inside the transactional area, at the end of the tx , ORM engine will generate the update sql.
+
+--this is known as the ORM s/w maintaining synchronization bt entity obj and the db table records.
+
+--we have a method called merge() inside the EntityManager obj to update a record also.
+
+em.persist()
+em.find()------------>persistence state-----------em.close(), em.clear()--------->detached state---->em.merge()--->persistence state
+
+Note:- to see the ORM tool(HB) generated sql queries on the console add the following property inside the persistence.xml
+
+  <property name="hibernate.show_sql"  value="true"/>
+
+to create or update the table according to the entity class mapping information:-
+
+   <property name="hibernate.hbm2ddl.auto"  value="create"/>
+*************************************************
+exception handling in springboot-
+================================
+
+In order to handle the exception and change the default status code 500 to error specific status code we need to define another
+method inside the controller class and annotate this method with @ExceptionHandler annotation as follows
+
+Note: We should not handle the exceptions of the request handler method inside try and catch block, instead we should
+let the Spring boot handle that exception and generate a error repsonse in the form of JSON object with the appropriate
+error status code. so that client can use that status code and display the appropriate result.
+
+Note:- it is always recommended to through our own domain-specific custom exception class object instead of throwing,
+predefined Layer specific/technology specific exception class objects to achieve loose coupling among different layers.
+
+Note:- Spring boot by default does not map the custom exceptions to 404 error like Not Found exception class, if we try
+to call an invalid resource.(any invalid URI ) for this we need to create a different exception handler as follows.
+
+Reading the validation messages from the external properties file: messages.properties file
+
+To resolve the messages from the messages.properties files we need to configure "LocalValidatorFactoryBean" as a
+Spring bean object.
+
+Note:- LocalValidatorFactoryBean class uses "ReloadableResourceBundleMessageSource" class to read the
+messages.properties file and resolve the validation messages.
+
+
+
+*****************************************************************************
+Java Introduction
+====================
+Java was developed by James Gosling in 1995, at Sun Microsystems which was
+later acquired by Oracle in 2010.
+
+It was originally called OAK after an OAK tree that stood outside Gosling’s Office,
+later it was renamed “Green” and was finally renamed to “Java” inspired by Java
+Coffee, that’s why its logo looks like a cup of coffee.
+
+Note:- JSE is the basic foundation of the remaining 2 other editions.
+The latest version of Java is Java 17 which was released on 14-
+Sep 2021
+
+Every java program should have at least one method. and that method is called
+the main method.
+
+The main method is an entry point of our java application.
+
+Whenever we execute a java program, the main function gets called and the code
+inside this main method gets executed.
+
+To name our classes we use PascalNamingConvention(first letter of every word in
+uppercase
+
+and to name our methods we use camelNamingConvenion.
+
+Inside java programming, we have a concept called a package. we use the
+package to group related classes, so as our application grows, we are going to
+end up with many classes, so we should properly organize these classes inside
+different packages.
+
+By convention, the base package for a java project is the domain name of your
+company in reverse.
+
+it does not mean we should have an actual domain registered. this is just a way to
+create a namespace for our classes.
+
+example: com.massai;
+
+Note: All java files should have a .java extension. and every statement in the java
+application should be terminated with a semicolon ;
+
+Here System is a predefined java class, which belongs to java.lang package. inside
+this class, we have various members, out is a member (field) who belongs to this
+System class.
+the type of this out field is the PrintStream class. this PrintStream is another
+predefined class in java. the println method belongs to this PrintStream class.
+So here we are calling or executing the println method inside our main method.
+************************************************************************************
+Java Language Fundamentals
+============================
+Note: To provide identifiers in java programming, we have to use the following rules and regulations:-
+
+Identifiers should not be started with any number, 
+identifiers may be started with an alphabet, '_'
+symbol, '$' symbol, 
+but, the subsequent symbols may be a number, an alphabet, '_' symbol, '$' symbol.
+
+In java applications, it is suggestible to provide identifiers with a particular meaning
+
+Among the list of keywords list mentioned below the keywords goto and const are currently not in use.
+They are reserved words (for future use)..
+
+To identify "min value" and "max value" for each and every data type, JAVA has provided
+the following two constant variables from all the wrapper classes.
+
+MIN_VALUE and MAX_VALUE
+
+
+Note: Type Checking is the responsibility of compiler and Type Casting is the responsibility
+of JVM.
+
+Reason: char internal data representation is compatible with int.
+
+Note:- In java any decimal point number will be by default treated as double
+
+In java applications, only class level variables are having default values, local variables
+are not having default values. If we declare local variables in java applications then we
+must provide initializations for that local variables explicitly, if we access any local
+variable without having initialization explicitly then compiler will rise an error like
+"Variable x might not have been initialized".
+
+**********************************************************************************
+Introduction of OOPs
+====================
+
+
+Class is the virtual encapsulation of properties and behaviours. The object is the
+physical encapsulation of properties and behaviours.
+
+To represent entities data in Java applications we will use variables.
+and to represent entities’ behaviours we will use methods.
+
+All the static elements will be loaded into RAM first, and all the non-static elements
+will be there inside the hard disk in the form of bytecode in the dot class file. now
+JVM searches for the main
+
+method and control start the execution of a java program from the first line of the
+main method.
+
+Note: since static elements are loaded into the RAM, they will be available for the
+CPU for the execution, but non-static members will not be loaded into the RAM
+initially. so they will not be available to the CPU for the execution.
+
+We can not access the non-static elements from the static area directly.
+The procedure of loading the contents of the hard disk to the RAM dynamically at
+runtime
+is done by creating an object of a class, this is the need for creating an object.
+
+Note: In Java, a single object can be referenced by multiple reference
+variables simultaneously, but at a time one reference variable can refer to
+only one object.
+
+Note: the default value of a reference variable is null. and if a variable is holding
+the null value and, from that variable if we try to access any non-static static
+element, then it will throw a “NullPointerException” at runtime.
+
+Using non-static variables and methods, we represent the state and behaviours
+of an object.
+whereas using static variable and static method we represent class level
+members.
+
+Only one copy of that member would be shared by all objects
+static members belong to the class, whereas non-static members belong to
+the object.
+
+Note:- whenever we use any class name in our application, if that class is in the
+current path, then that class context will be created, and all its static members
+will be loaded. context of a class will be created only one time for the entire JVM,
+whereas we can create an object of a class multiple times, whenever we require.
+
+********************************************************************************
+: Object Collaboration-
+======================
+Note:- We can define a class as an instance member inside another class also, by this we
+establish
+‘Has-A' relationship between 2 objects.
+
+Note: We can access the static members of a class from any static method directly whereas, to
+access the non-static members from the static method, we need to create an object.
+
+All the non-static members are sharable, i.e. we can access the non-static members of a class
+from any non-static method directly.
+
+Note: println() method belongs to the “java.io.PrintStream” class. “out” is a variable of this
+PrintStream class, which is statically defined inside the System class.
+
+Note: in Java, while defining a method, we must specify the return type, at least void.
+Method name generally we take as verb, whereas variable names we take as noun.
+
+A concrete method must have a body, at least zero body.
+
+Note: if a method takes a concreate class as a parameter, then in order to call that
+method, we can pass following 3 things:
+a. same class object
+b. its child class object 
+
+c. null
+
+So, it is always recommended to check the null value inside the method definition, before
+accessing any member from the supplied object.
+
+We can define a method with class as a return type also, if a method is defined to
+return a class type then that method should return one of the following :
+1. Same class object
+2. child class object of the specified type
+3. null
+
+Note: In Java, there is a class called Object class which act as a parent/super
+class of any java class directly or indirectly.
+This Object class belongs from “java.lang” package.
+
+Note:- we can have a dot java file of a class, without a constructor, but we
+can't have a dot class file of a class without a constructor.
+
+At least default constructor must be there inside the dot class file of a class.
+Default constructor given by the compiler will always be public and zero
+argument
+
+Note: if we keep any constructor in our dot java file, then java compiler
+
+won't provide default constructor to our dot class file.
+
+Note: ‘this’ keyword we can not use inside the static area.
+
+Note:- if we call a constructor explicitly from the another constructor then that call
+must be the first line.
+
+Note: There are two ways to provide values to the object. One way is by constructor
+and second is by setter method.
+
+
+*****************************************************************************************
+
+: String, Array, CLA, Scanner
+=============================
+Java Strings are Immutable
+Reason: Here, we are using the concat() method to add another string to the previous string. since
+string objects are immutable, if we call any method to do any modification in the string object, that
+method will return a new string object with modified content.
+
+Why String objects are immutable in Java?
+As Java uses the concept of String literal. Suppose there are 5 reference variables, all refer to one
+object "Masai". If one reference variable changes the value of the object, it will be affected by all the
+reference variables. That is why String objects are immutable in Java.
+
+Note: If we want to create a mutable (modifiable) String object, we should use either StringBuffer or
+StringBuilder classes. both classes belong to java.lang package also.
+
+Note: In Java array is a special type of object whose class is non-existence. whenever JVM
+encounters [], it will create an array object in the memory.
+
+• The variables in the array are ordered, and each has an index beginning from 0.
+• The size of an array must be specified by int or short value and not long.
+
+
+Note: at the time of creating an array object, all the variables inside the array will be initialized
+with their default value.
+
+If we try to access an element from an array beyond its size, then it will raise a runtime exception
+called ArrayOutOfBoundException.
+
+Note: Inside every array object, there is a non-static variable called “length” is there, which will
+represent the size of an array.
+
+The above student array we can create by using curly bracket also.
+ex:
+student[] students = {new Student(10,"Ram"),new Student(20,"Ramesh"),new Student(40,"Amit")};
+
+Since in Java, arrays are treated as an object, the array variable will be treated as a reference variable,
+
+and the default value of any reference variable is null.
+***********************************************************************************
+Inheritance, method
+Overriding, Object class, super
+keyword, Object downcasting,
+toString method.
+======================
+Note: In Java, Inheritance is represented in the form of the "extends" keyword.
+Inheritance represents the IS-A relationship which is also known as a parent-child
+relationship.
+
+Interface is defined when you don’t have implemetation details.
+
+A concrete class is defined when you have complete details about the object.
+Abstract class is like a transition(transform) between interface and concrete
+class.
+
+Note: The multiple inheritance and the hybrid inheritance have diamond problem
+meaning one class is driving from multiple classes.
+
+Note: Multiple inheritance is not supported in Java through class.
+To reduce the complexity and simplify the language, multiple inheritance is not
+supported in java.
+
+Note: We can not override a static method :
+We should use @Override annotation to validate a valid method overriding at
+compile time.
+
+Note: As we know that default constructor is provided by the compiler automatically if
+there is no constructor. But, it also adds super() as the first statement.
+
+Note: Runtime polymorphism can't be achieved by data members.
+
+Note: An object of subclass type is also a type of parent class. For example, if
+Dog extends Animal then object of Dog can be referred by either Dog or Animal
+class.
+
+Note: We can downcast the parent class variable to the child class object only if
+the Parent class variable points to the Child class object , otherwise it will throw a
+runtime exception called ClassCastException.
+
+Note: Whenever we try to print any Object reference, then internally toString() method
+is called.
+
+It is always recommended to override the toString() method to get our own String
+representation of Object. For more on override of toString() method.
+
+
+
+************************************************************************************
+Access Modifiers,
+Packages, Abstract methods and
+Abstract class
+=======================
+Note: A Package is like a folder in a file directory, In Java, every package is a folder
+but every folder is not a package.
+
+If a java class belongs to a package, in order to use that class inside our java
+application (or inside a different class) we need to import that class .
+
+The protected access modifier is accessible within package and outside the package
+but through inheritance only
+
+The protected access modifier can be applied on the data member, method and
+constructor. It can't be applied on the class.
+
+It provides more accessibility than the default modifer.
+
+If you are overriding any method, ( declared in subclass) must not be more restrictive.
+
+Abstraction lets you focus on what the object does instead of how it does it
+
+abstract class cannot be instantiated.
+
+An abstract class can have a data member, abstract method, method body
+(non-abstract method), constructor, and even main() method.
+Rules:
+
+1. If there is an abstract method in a class, that class must be abstract.
+
+2. If you are extending an abstract class that has an abstract method, you
+must either provide the implementation of the method or make this class
+abstract.
+********************************************************************************
+: Interface, Early and late
+binding, static and default
+method in java 8, Var-args,
+Enums
+==============================
+Java Interface also represents the IS-A relationship
+
+It cannot be instantiated just like the abstract class.
+
+Since Java 8, we can have default and static methods in an interface.
+To declare an interface, use the interface keyword
+To
+
+implement an interface to a class we use implements keyword.
+We save an interface also with the .java extension.
+
+Note: The Java compiler adds public and abstract keywords before the interface
+method. Moreover, it adds public, static and final keywords before data members.
+
+As shown in the figure given below, a class extends another class, an interface extends
+another interface, but a class implements an interface
+
+A class implements an interface, but one interface extends another interface.
+
+Note: The default method of an interface need not override inside the
+implementation class, but if we want we can override the default method also with
+some other implementation inside the implementation class.
+
+ 
+
+Note: these methods are not inherited. We always call the static method with the
+help of Interface name.
+Simply, an abstract class achieves partial abstraction (0 to 100%) whereas an
+interface achieves fully abstraction (100%). Not very valid after Java 8.
+
+Note:
+• Every enum is internally implemented by using Class.
+• Every enum constant represents an object of type enum.
+
+We can declare the main() method inside the enum. and we can run an enum file
+directly from the Command Prompt.
+
+All enums implicitly extend java.lang.Enum class. As a class can only
+extend one parent in Java, so an enum cannot extend anything else
+We can define constructors, methods, and fields inside enum types, which makes
+them very powerful.
+
+If we want we can override the method inside any item also.
+We can’t create enum objects explicitly and hence we can’t invoke enum
+constructor directly.
+
+The constructor of enum type is private. If you don't declare private, compiler
+internally creates private constructor.
+
+
+From Java 5 onwards we can take enum inside the switch case also.
+**************************************************************
+Handling Date and Time
+in Java8 and Collection
+framework Introduction
+=========================
+This java 8 date API provides various classes and Enums in java.time package, using
+which we can represent Date and Time in our application efficiently
+
+It is an Immutable class, so if we try to perform any update in this object, it will return a
+new LocalDate class object.LocalDate class
+
+This ChronoUnit enum belongs to java.time.temporal package. it is the most useful
+structure in java.time API.
+
+With the help of this enum also we can get the difference between 2 dates in more
+precise way.
+
+If we want to perform plus or minus operation on the LocalDate, LocalTime,
+LocalDateTime object, then also we can use this ChronoUnit enum.
+
+**************************************************************************************
+Collection Framework
+=========================
+Note: With the help of array also we can group of multiple object as a single
+entity(object).
+
+To represent Collection objects in java applications, JAVA has provided predefined
+classes and interfaces in the form of java.util package called as "Collection
+Framework"
+
+Note: In java we can group multiple object as a single object by using either by
+Collection or by using Map also.
+
+Note: from the java 1.5 version onwards LinkedList class also implements the
+Deque interface.
+
+ArrayList is the best choice if our frequent operation is retrieval
+
+Note: All the collection classes internally overrides the toString() method, so when
+we print the object of the collection classes, it will print the elements inside
+the [] square bracket, instead of printing the address.
+
+Note: All the collection classes does not allows the primitives types, it only accept the objects.
+so if we want to store any primitive values, we need to store it in the form of corresponding wrapper classes. Internally
+collection classes uses auto-boxing and auto-unboxing feature to store the primitive in the form of corresponding wrapper
+classes objects.
+
+Note: we can call all the methods defined inside the Collection interface on the ArrayList object.
+The capacity concept is not applicable.
+Methods of the ArrayList class is not synchronized, whereas most of the methods of the Vector class is
+synchronized.
+
+Note: To the variable of List we can store any of its implementation object by this way we can achieve the
+Runtime polymorphism.
+
+Note: Since Set does not follow the index, so we can not access the elements one by one from any of the Set
+implemented classes, so to traverse the elements of the Set implemented classes
+we can not use normal for-loop, but we can use enhanced for-loop or Iterator to traverse elements of a Set implemented
+classes.
+Student s1 = new Student(10,"Ram",500); //roll,name,marks
+Student s2 = new Student(10,"Ram",500); //roll,name,marks
+
+Note: technically at memory level both objects are different, but if we want to make
+both object s1 and s2 equal logically then we need to override both
+method inside the Student class.
+
+Note: As per the Java documentation, both the methods should be overridden to get the complete equality
+mechanism; using equals() alone is not sufficient. It means, if we override the equals(), we must override the
+hashcode() method.
+
+Note: HashSet and LinkedHashSet class internally uses equals and hashCode method to identify the duplicate objects.
+
+Note: TreeSet class by default only accept the Comparable object. if we try to add any non-comparable object inside the
+TreeSet object, then at runtime it will throw a ClassCastException.
+Note: All the Wrapper classes and String class internally implements the Comparable interface.
+
+
+===================================================
+Map, Arrays and
+Collections classes, Iterator,
+Generics, Queue, Priority Queue
+
+The Key of the TreeMap should be Comparable, if the key is not Comparable then we
+need to use the Comparator and specify the that Comparator implemented class object
+to the TreeMap constructor.
+
+Without Generics, we can add any type of Objects in Collection classes:
+
+The T type indicates that it can refer to any type (like String, Integer, and Employee).
+The type you specify for the class will be used to store and retrieve the data.
+
+A class that can refer to any type is known as a generic class. Here, we are using the T
+type parameter to create the generic class of specific type.
+
+We can use a wildcard as a type of a parameter, field, return type, or local variable.
+However, it is not allowed to use a wildcard as a type argument for a generic
+
+method invocation, a generic class instance creation, or a supertype.
+
+Suppose, we want to write the method for the list of Integer and its supertype (like
+Number, Object). Using List<? super Integer> is suitable for a list of type Integer or
+any of its superclasses whereas List<Integer> works with the list of type Integer only.
+So, List<? super Integer> is less restrictive than List<Integer>
+
+This is again a real life scenario. Let's say that by default the CustomerOrder object is
+prioritized by the orderId. But then we need a way in which we can prioritize based on
+orderAmount.
+
+You may immediately think that we can modify the compareTo function in
+the CustomerOrder class to order based on orderAmount.
+
+The solution to this is pretty simple: we can create a new custom comparator for the
+CustomerOrder class and use that along with the priority queue
+===================================================================================
+Functional Interface in java8,
+Lambda Expression, Method reference,
+Java Stream API with functional
+programming
+
+Note: It's recommended that all functional interfaces have an
+informative @FunctionalInterface annotation. This clearly communicates the purpose of the interface,
+and also allows a compiler to generate an error if the annotated interface does not satisfy the conditions.
+
+This interface belongs to java.lang package
+
+Note: A functional interface can extends another interface only when it does not have any abstract
+method.
+
+Note:- to use the anonymous inner class the Interface need not be functional, i.e. an interface may have
+more than one abstract method also.
+
+With the help if functional interface ,we can achieve functional programming in java using Lambda
+expression.
+
+This method test() checks whether supplied obj satisfying a condition or not
+In java 8 Collection interface defines a method called:
+
+public boolean removeIf(Predicate filter)
+Based on the condition of Predicate, this method will remove/filter the elements from the Collection
+classes
+
+The Stream API is used to process collections of objects. A stream is a sequence of objects that supports
+various methods which can be pipelined to produce the desired result.
+
+From java 8, Collection interface provides following method to gets a Stream obj.
+
+public default Stream<T> stream();
+
+=====================================================================================
+Multithreading, Executor Framework
+
+However, we use multithreading than multiprocessing because 
+1.threads use a shared memory area. 
+2.They don't allocate separate memory areas so saves memory, and
+3. context-switching between the threads takes less time than
+process.
+Note: At least one process is required for each thread
+
+Note: In Java, every program/application has a default flow of execution, a default thread, it is called the main
+thread. if we can start another flow of execution(another thread) along with the main thread simultaneously
+then it is called a multithreaded application or program.
+
+Thread class and Runnable interface are the two structures using which we implement Thread based
+multitasking in java.
+
+The signature of a function using which we implement a thread is defined in an interface by the name Runnable.
+
+This Runnable interface belongs to java.lang package. it has only one abstract method:run()
+
+This start() method of the Thread class recognize the run() method of the Runnable interface and then the run()
+method is executed as a separate individual thread.
+
+Note: Internally the Thread class implements the Runnable interface and override run() method with empty
+implementation.
+
+Note:-weather we extends Thread class or implement Runnable interface directly, we have to use run()
+method of the Runnable interface.
+
+The start() method present in the Thread class is responsible to perform all the mandatory activity which are required
+for our thread. (like, registering our thread with the Thread-scheduler, performing all the low level task to start a
+separate flow of execution. and then calling the run() method).
+
+Hence without executing thread class start() method there is no chance of starting new thread in Java.
+
+After starting a thread we are not allowed to restart the same thread once again otherwise we will get a runtime
+exception called IllegalThreadStateException.
+
+If we extends Thread class to create a new thread then we loose the chance of Object Orientation biggest advantage
+of inheritance i.e. we cannot extends another class simultaneously
+
+To solve the above problem, we use the Runnable interface, so we take a separate class by implementing Runnable
+interface and overrides the run() method and inside the run() method define the functionality which we want to
+execute as a separate thread,
+then supply the object of that class to the Thread class constructor and create Thread class object and start that
+thread.
+
+Every thread in java has some name, it may be default name generated by the JVM or explicitly provided by the
+programmer.
+
+Thread class has provides following getter and setter methods to get and set name of a thread.
+
+Note :- priority should be assigned to the corresponding thread before calling the start() method
+If two threads having the same priority then we can't expect the exact execution order.it depends on the thread
+scheduler.
+
+Note:-the default priority for main thread is 5 and for all remaining thread it will be inherited from parent to child.
+A high priority thread does not run faster than lower priority thread.
+
+Thread priority is not a rule for thread-scheduler, it is just a hint. so no guarantee for the execution (it will work only if
+thread is in the waiting state or if there is a limited CPU time).
+
+• If we are using thread priority for thread scheduling then we should always keep in mind that the underlying
+platform should provide support for scheduling based on thread priority.
+
+Once the run() method has been handed over to the thread-scheduler then,
+some time it is necessary to control the execution of the thread which is under execution.
+
+For that purpose, we have some functionality(methods) inside the Thread class which helps us in gaining partial
+control over the execution of run() method which are already scheduled by the thread-scheduler.
+
+This sleep method is proven to generate checked exception hence it must be called inside try and catch block.
+
+Note : we cannot use throws with run() method, it will violate the method override rule.
+
+The main reason is that there's no-one to catch the exception, except for any catch-all handlers you might register
+with your  Thread or the containing  ThreadGroup
+
+If a thread wants to wait until completion of other thread then we should use join() method.
+If a thread t1 calls join() method on another thread t2, like t2.join() then t1 thread will be enter into waiting state
+until t2 thread completes.
+
+
+Note: The synchronized keyword applicable only for methods and blocks but not for variables and classes.
+If a method or block is declared as synchronized then at a time only one thread is allowed to execute that method or
+block on a given object so that data inconsistency problem will be resolved.
+
+Any method that changes the state of an object. i.e. add/update/delete/replace method we should use as
+synchronized.
+
+Note: while one thread is executing any one synchronized method on the given object then the remaining threads are
+not allowed to execute any other synchronized method simultaneously. but remaining threads are allowed to execute
+any non-synchronized method simultaneously
+
+In java as there is a unique lock for each object of a class, similarly there is a unique lock for each class also.
+If a thread try to execute a static synchronized method then it required class level lock.
+object lock and class level lock both are independent and there is no link between them.
+
+While a thread is executing a static synchronized method, the remaining threads are not allowed to execute any other
+static synchronized method of that class simultaneously (**even on the multiple object of that class also)
+but remaining threads are allowed to execute normal static and synchronized non-static methods and normal nonstatic methods simultaneously.
+
+In the inter-thread communication the thread which require updation it has to call wait() method.
+The thread which performing updation it will call notify() method, so that waiting thread will gets the notification
+and it continues its execution with those updation.
+
+Note:- we can call wait(), notify(),notifyAll() only in the synchronized block or synchronized methods.
+otherwise we will get a runtime exception.
+Wait and notify or notifyAll method belongs from Object class because "a thread" can call these methods on any
+java object.
+
+To call wait() or notify() method on any object we must have that particular object lock otherwise we will get a
+runtime exception called IllegalMonitorStateException.
+
+Creating a new thread for every task may creates performance and memory problems, to overcome this we
+should go for Thread pool.
+
+Thread pool framework is also known as executor framework. this concept is introduced in java5
+
+Note:- the object of Callable we can't pass to the normal Thread class constructor unlike Runnable
+object, here we need to use the ExecutorService class help.
+
+==========================================================================================
+Day15: File and IO-stream, Serialization,
+Java NIO package
+
+
+Note:- if the file is already there, it instead of creating a new file, it will points to the existing file
+only
+Note:- the main limitation of the FileWriter class is, while writing the data in a file we need to
+insert the line separator manually("\n") or ("\r\n"), depending upon different Operating System.
+
+Note: the main limitation of the FileReader is we have to read character by character which is not
+convenient to the programmer and it is not recommended with respect to performance also.
+
+To overcome the problem of FileWriter and FileReader we should use the BufferedReader and the
+BufferedWriter class
+
+Note: The BufferedWriter class never communicate directly with the file. it communicate with the
+file via some other Writer object.
+
+The main advantage of BufferedReader over the FileReader is we can read the data line by line
+instead of character by character
+
+Note:-BufferedReader also can't communicate directly with the file, it will communicate with file via some
+
+Note: PrintWriter class can communicate directly to the file and even via some writer object also.
+
+Note: difference between write(100) and print(100) is write(100) method will write corresponding character
+'d' whereas print(100) method will print the int value to the file.
+
+Note: The most enhanced reader is the BufferedReader class and the most enhanced Writer is the
+PrintWriter class.
+
+Note: As we can use Reader and Writer class to handle character data, we can use InputStream and
+OutputStream class to handle binary data like images, audio, video, a class Object state, etc.
+
+
+Note: If we try to serialize a non-serializable object (If the object of a class has not implemented the
+Serializable interface )then we will get a runtime exception called NotSerializableExcception
+
+Note: all the Wrapper classes, String classes and collection framework related classes internally
+implements the Serializable interface.
+
+The java.io.ObjectOutputStream class helps us to serialize an object of a java class (converts it into a
+sequence (stream) of bytes)
+
+Similarly, The java.io.ObjectInputStream class helps us read a stream of bytes and convert it back into a
+Java object.(Deserialization)
+Note: we can serialize multiple object, but in which order we serialized those objects, in the same order
+only we have to deserialize those objects.
+
+static variables are not part of object, hence they will also not participate in serialization.
+
+
+If the parent class is implementing Serializable interface then automatically every child class implements
+Serializable. weather we mention it or not in a child class.
+It is a Serializable nature of inheriting parent to child.
+
+If the parent class doesn't implements the Serializable interface still we can serialize the child
+objects.
+ if the child class implements Serializable interface.
+
+At the time of serialization JVM will ignores the updated values of instance variables which are
+inherited from the parent.
+
+At the time of Deserialization JVM will check if the parent class is serializable or not. if the parent
+class is non-serializable then JVM will creates an object for non-serializable parent class by
+executing default constructor of the parent class and share its default instance variable value to
+the child objects.
+
+
+Note:- Getting the object of Path doesn't mean that creating a new File or folder
+
+Note : If we use move() method in place of copy() method then from the source the files will be
+removed(like cut and paste option).
+
+
+====================================================================================================
+Day16: SQL
+--------------
+Day16: SQL=
+
+We can use JDBC API to access tabular data stored in any relational database. By the
+help of JDBC API, we can save, update, delete and fetch data from the database.
+

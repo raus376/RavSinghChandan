@@ -1,0 +1,698 @@
+Relationship among tables:
+---------------------------------
+
+PK -----> FK
+
+Dept    ----> parent
+deptid;
+
+
+Emp ----> child
+did ----------> FK refer PK of Dept table (deptid) 
+
+DB violates following 2 rules:
+
+1. deletion and updation in parent table
+
+2.insertion in child table
+
+
+to solve this problem we should use following clause inside child table while defining FK
+
+on delete cascade
+
+or 
+
+on delete set null
+
+
+example: 
+
+create table employee
+(
+empid int primary key,
+ename varchar(12),
+address varchar(12),
+salary int,
+did int, foreign key(did) references dept(deptid) on update cascade
+);
+
+
+A    B 
+
+IS-A 
+HAS-A
+
+
+dept : emp : one to many
+
+3 type of relationships:
+
+1. one to one (Person : DL ) : (FK : unique )
+2.one to many (dept to emp) (PK and FK)
+3.many to many(student : course) we need to take 3rd linking table
+
+
+many to many relationship:
+----------------------------------
+
+create table student
+(
+roll int primary key,
+sname varchar(12),
+address varchar(12),
+mobile varchar(10)
+);
+
+
+create table course
+(
+cid int primary key,
+cname varchar(12),
+duration varchar(12),
+fee int
+);
+
+
+
+create table student_course
+(
+roll int,
+cid int
+);
+
+
+select s.roll, s.sname,s.address, s.mobile, c.cname,c.fee from student s 
+JOIN course c JOIN student_course sc ON sc.roll = s.roll AND sc.cid = c.cid AND c.cname = 'react'; 
+
+
+
+JDBC:
+=====
+
+business application : common general things required for a business application:
+
+1. maintaining business data permanently in a secure and easily retrival manner.
+
+2.processing the business data according to the business rules.
+
+3.presenting the data to end-user in user understandable format.
+
+
+object's state  : serialization and desiralization approach    
+
+ 	JDBC driver s/w 
+DB<== translator--------------==>JAVA
+
+sql language 
+
+method calls 
+
+
+
+JDBC: it is a technology to communicate java app with the DB s/w in a standard manner.
+
+--it is a specification (documentation which describes rules and guidelines to develop a perticular s/w).
+
+--the implementation of this jdbc specification is noting but jdbc driver s/w.
+
+this jdbc specification provides api to perform db operation with the java app in the form of following 2 packages.
+
+1.java.sql package 
+
+2.javax.sql package
+
+
+JDBC specification is implemented by the DB vendor or 3rd party vendor and create jdbc driver s/w.
+
+
+--laptop   : printer (driver cd)
+
+JDBC specification ()
+
+DB : ratandb:  ---> driver to comm with java app (---  --- ----) docu
+
+jdbc driver s/w comes in the form of jar file (it is written in java and any java s/w comes in the form of jar file)
+
+
+each DB s/w has their own jdbc driver s/w 
+
+mysql: mysql-connector.jar
+
+( class interface )----jar file
+
+
+oracle db : Ojdbc6.jar
+
+postgress: postgress.jar
+
+
+--first we need to download the jdbc driver jar file from the net.
+
+--in order to work with that jar file ,we need to set that jar file to the classpath of our project.
+
+create a new java project--->right click---> 
+build path--->
+configure build path---->
+libraries tab---->Add external jars--->
+choose the downloaded jar file ---->
+Apply and close.
+
+client                  server
+Java app <------>DB
+
+responsibility of the jdbc client (java app):
+=================================
+
+1. requesting the DB connection
+
+2.submitting the appropriate sql statement to the DB server in the form of String obj.
+
+3.proccessing the result given by the DB server.
+
+4.dealing with exceptions if any .
+
+5.manage the tx whenever required.
+
+6.closing the DB connection once done with DB operation.
+
+
+
+responsibilty of the jdbc driver:
+========================
+
+1. establish the connection bt java app and DB server.
+
+2.recieving the jdbc method calls and translate them into the DB understandable format. and forward them to the DB server.
+
+3.translating the DB given result into the java format and returns to the jdbc client.
+
+
+
+steps to connect our java app with the mysql db server:
+==========================================
+
+step 1: collect or download the jdbc driver jar file and add that jar file to the classpath of our project.
+
+step 2: load the jdbc driver related main class into the memory.
+
+"com.mysql.cj.jdbc.Driver"
+
+
+each jdbc driver has diff main class :
+for oracle:
+
+"oracle.jdbc.driver.OracleDriver"
+
+example:
+
+Class.forName("com.mysql.cj.jdbc.Driver");
+
+
+
+
+
+step 3: prepare the connection string/url
+
+String url = "jdbc:mysql://localhost:3306/web16db";
+
+step 4: establish the connection
+
+
+Driver
+
+
+step 5: after performing the CRUD operation close the DB connection
+
+
+
+
+Demo.java:
+--------------
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");//1
+		} catch (ClassNotFoundException e) {
+			
+			e.printStackTrace();
+		}
+		
+		String url = "jdbc:mysql://localhost:3306/web16db";//2
+		
+		
+		try {
+			Connection conn= DriverManager.getConnection(url,"root", "root");//3
+			
+			if(conn != null) {
+				
+				System.out.println("connected...");
+			}
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+	}
+
+}
+
+
+
+once we get the connection obejct , now we can submit any sql query to the DB server.
+for that we need java.sql.Statement(I) object. 
+
+Statement st=  conn.createStatement();
+
+once we have the Statement obj, we can pass any type of sql query the the DB server by using following methods of the Statement object.
+
+1. public int executeUpdate(String dml); (insert, update, delete)
+
+2. public ResultSet executeQuery(String drl); (select)
+
+3.public boolean execute(String anySql);
+
+
+
+example : inserting a record to the table :
+
+	try {
+			Connection conn= DriverManager.getConnection(url, "root", "root");
+			
+			Statement st= conn.createStatement();
+				
+			int x= st.executeUpdate("insert into student values(10,'Ravi',800)");
+			
+			if(x > 0)
+				System.out.println("record inserted...");
+			else
+				System.out.println("not inserted...");
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+
+Note: DB engine will execute any sql query, while executing the sql query DB engine perform following task:
+
+1. query compilation.
+
+2.generate the best plan to execute the query.
+
+3.query optimization
+
+PreparedStatement obj
+
+ 
+	Statement(I)
+       	       |
+	PreparedStatement(I)
+
+
+to get the PS object :
+
+PreparedStatement ps= conn.prepareStatement("insert into student(?,?,?)");
+			
+after getting the PS obj we need to bind the appropriate value to the placeholders. for that PS object provides variaous setXXX() methods to bind the value.
+
+setInt(1,roll);
+
+setString(2,name);
+
+setInt(3,marks);
+
+after binding the value to the placeholders we need to execute the PS object by calling following methods:
+
+DML :    executeUpdate();
+
+DRL : executeQuery();
+
+
+Demo.java:
+---------------
+
+package com.masai;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		
+		Scanner sc = new Scanner(System.in);
+		
+		System.out.println("Enter Roll :");
+		int roll= sc.nextInt();
+		
+		System.out.println("Enter name :");
+		String name= sc.next();
+		
+		System.out.println("Enter Marks :");
+		int marks= sc.nextInt();
+		
+		
+		
+		
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String url = "jdbc:mysql://localhost:3306/web16db";
+		
+		
+		try {
+			Connection conn= DriverManager.getConnection(url, "root", "root");
+			
+			//Statement st= conn.createStatement();
+				
+			PreparedStatement ps= conn.prepareStatement("insert into student values(?,?,?)");
+			
+			ps.setInt(1, roll);
+			ps.setString(2, name);
+			ps.setInt(3, marks);
+			
+			
+			int x= ps.executeUpdate();
+			
+			if(x > 0)
+				System.out.println("record inserted...");
+			else
+				System.out.println("not inserted...");
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+
+}
+
+
+
+closing the connection using try with resource:
+=====================================
+
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		
+		Scanner sc = new Scanner(System.in);
+		
+		System.out.println("Enter Roll :");
+		int roll= sc.nextInt();
+		
+		System.out.println("Enter name :");
+		String name= sc.next();
+		
+		System.out.println("Enter Marks :");
+		int marks= sc.nextInt();
+		
+		
+		
+		
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String url = "jdbc:mysql://localhost:3306/web16db";
+		
+		
+		try(Connection conn= DriverManager.getConnection(url, "root", "root")) {
+			
+			
+			//Statement st= conn.createStatement();
+				
+		PreparedStatement ps= conn.prepareStatement("insert into student values(?,?,?)");
+			
+			ps.setInt(1, roll);
+			ps.setString(2, name);
+			ps.setInt(3, marks);
+			
+			
+			int x= ps.executeUpdate();
+			
+			if(x > 0)
+				System.out.println("record inserted...");
+			else
+				System.out.println("not inserted...");
+			
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+
+}
+
+
+
+Update operation:
+===============
+
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		
+		Scanner sc = new Scanner(System.in);
+		
+		System.out.println("Enter Roll number whose marks need to be graced :");
+		int roll= sc.nextInt();
+		
+		
+		System.out.println("Enter the grace marks :");
+		int marks= sc.nextInt();
+		
+		
+		
+		
+		
+		
+		
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String url = "jdbc:mysql://localhost:3306/web16db";
+		
+		
+		try(Connection conn= DriverManager.getConnection(url, "root", "root")) {
+			
+			
+			//Statement st= conn.createStatement();
+				
+			PreparedStatement ps= conn.prepareStatement("update student set marks = marks+? where roll = ?");
+			
+			ps.setInt(1, marks);
+			ps.setInt(2, roll);
+			
+			int x= ps.executeUpdate();
+			
+			if(x > 0)
+				System.out.println(x+" record updated...");
+			else
+				System.out.println("not updated...");
+			
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+	}
+
+}
+
+
+performing select statement:
+=======================
+
+select * from student;
+
+ResultSet  executeQuery();
+
+from the DB result of the select query will come in the form of ResultSet object.
+
+to fetch the details from the ResultSet object, we should know about the structure of the RS obj.
+
+
+Search student example:
+=====================
+
+
+public class Demo {
+	
+	public static void main(String[] args) {
+		
+		
+		Scanner sc = new Scanner(System.in);
+		
+		System.out.println("Enter Roll number to get the details");
+		int roll= sc.nextInt();
+		
+		
+		
+		
+		
+		
+		
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String url = "jdbc:mysql://localhost:3306/web16db";
+		
+		
+		try(Connection conn= DriverManager.getConnection(url, "root", "root")) {
+			
+			
+			//Statement st= conn.createStatement();
+				
+			PreparedStatement ps= conn.prepareStatement("select * from student where roll =?");
+			
+			
+			ps.setInt(1, roll);
+			
+			
+			ResultSet rs= ps.executeQuery();
+			
+			if(rs.next()) {
+				
+				int r= rs.getInt("roll");
+				String n= rs.getString("name");
+				int m= rs.getInt("marks");
+				
+				
+				System.out.println("Roll is :"+r);
+				System.out.println("Name is :"+n);
+				System.out.println("Marks is :"+m);
+				
+			}
+			else
+				System.out.println("Student does not exist..");
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+
+}
+
+
+
+Selecting all student records:
+=======================
+
+
+public class Demo {
+	
+	public static void main(String[] args) {
+				
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String url = "jdbc:mysql://localhost:3306/web16db";
+		
+		
+		try(Connection conn= DriverManager.getConnection(url, "root", "root")) {
+			
+			
+			//Statement st= conn.createStatement();
+				
+			PreparedStatement ps= conn.prepareStatement("select * from student");
+			
+		
+			
+			ResultSet rs= ps.executeQuery();
+			
+			while(rs.next()) {
+				
+				int r= rs.getInt("roll");
+				String n= rs.getString("name");
+				int m= rs.getInt("marks");
+				
+				
+				System.out.println("Roll is :"+r);
+				System.out.println("Name is :"+n);
+				System.out.println("Marks is :"+m);
+				
+				System.out.println("=========================");
+				
+			}
+			
+			
+			
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+
+}
+
+
+
+

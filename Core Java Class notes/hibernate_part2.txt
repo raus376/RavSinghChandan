@@ -1,0 +1,776 @@
+DAO pattern example with JPA:-
+=========================
+
+EMUtil.java:-
+----------------
+
+public class EMUtil {
+	
+	
+	private static EntityManagerFactory emf;
+	
+	static{
+		emf=Persistence.createEntityManagerFactory("account-unit");
+	}
+	
+	public static EntityManager provideEntityManager(){
+		
+		//EntityManager em= emf.createEntityManager();
+		//return em;
+		
+		return emf.createEntityManager();
+	}
+}
+
+
+Account.java:- (Entity class)
+----------------
+
+
+@Entity
+public class Account  {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int accno;
+	private String name;
+	private int balance;
+	
+	
+	public Account() {
+		// TODO Auto-generated constructor stub
+	}
+
+
+	public int getAccno() {
+		return accno;
+	}
+
+
+	public void setAccno(int accno) {
+		this.accno = accno;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	public int getBalance() {
+		return balance;
+	}
+
+
+	public void setBalance(int balance) {
+		this.balance = balance;
+	}
+
+
+	public Account(int accno, String name, int balance) {
+		super();
+		this.accno = accno;
+		this.name = name;
+		this.balance = balance;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Account [accno=" + accno + ", name=" + name + ", balance="
+				+ balance + "]";
+	}
+
+}
+
+
+AccountDao.java:-(interface)
+--------------------
+
+public interface AccountDao {
+	
+	public boolean createAccount(Account account);
+	
+	public boolean deleteAccount(int accno);
+	
+	public boolean updateAccount(Account account);
+	
+	public Account findAccount(int accno);
+
+}
+
+
+AccountDaoImpl.java:-
+---------------------------
+
+
+public class AccountDaoImpl implements AccountDao{
+
+	@Override
+	public boolean createAccount(Account account) {
+		
+		boolean flag= false;
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		em.getTransaction().begin();
+		
+		em.persist(account);
+		flag=true;
+		
+		em.getTransaction().commit();
+		
+		
+		em.close();
+		
+		return flag;
+	}
+
+	@Override
+	public boolean deleteAccount(int accno) {
+		boolean flag=false;
+		
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		Account acc=em.find(Account.class, accno);
+		
+		if(acc != null){
+			
+			em.getTransaction().begin();
+			
+			em.remove(acc);
+			flag=true;
+			
+			em.getTransaction().commit();
+		}
+		
+		em.close();
+		
+		
+		
+		return flag;
+	}
+
+	@Override
+	public boolean updateAccount(Account account) {
+		
+		boolean flag=false;
+	
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		em.getTransaction().begin();
+		
+		em.merge(account);
+		flag=true;
+		
+		em.getTransaction().commit();
+		
+		
+		em.close();
+		
+		return flag;
+	
+	}
+
+	@Override
+	public Account findAccount(int accno) {
+		/*Account account=null;
+	
+	 EntityManager em=EMUtil.provideEntityManager();
+		
+	 
+	 	account = em.find(Account.class, accno);
+		
+		
+	
+	
+		return account;*/
+		
+		return EMUtil.provideEntityManager().find(Account.class, accno);
+		
+	}	
+}
+
+
+
+
+
+persistence.xml:-
+--------------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+
+    <persistence-unit name="account-unit" >
+
+	<class>com.ratan.model.Account</class>        
+
+<properties>
+         
+             <property name="hibernate.connection.driver_class" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="hibernate.connection.username" value="root"/>
+            <property name="hibernate.connection.password"  value="root"/>
+            <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/web16db"/>
+         
+            <property name="hibernate.show_sql"  value="true"/>
+            <property name="hibernate.hbm2ddl.auto"  value="update"/>
+         
+          
+
+        </properties>
+    </persistence-unit>
+</persistence>
+
+
+DepositUseCase.java:-
+----------------------------
+
+
+public class DepositUseCase {
+	
+	
+	public static void main(String[] args) {
+		
+		AccountDao dao=new AccountDaoImpl();
+		
+		/*Account acc1=new Account();
+		acc1.setName("Ramesh");
+		acc1.setBalance(880);
+
+		
+		
+		boolean f= dao.createAccount(acc1);
+		
+		if(f)
+			System.out.println("Account created..");
+		else
+			System.out.println("Not created...");*/
+		
+		
+		Scanner sc=new Scanner(System.in);
+		
+		System.out.println("Enter Account number");
+		int ano=sc.nextInt();
+		
+		Account acc= dao.findAccount(ano);
+		
+		if(acc == null)
+			System.out.println("Account does not exist..");
+		else{
+			
+			
+			System.out.println("Enter the Amount to Deposit");
+			int amt=sc.nextInt();
+			
+			acc.setBalance(acc.getBalance()+amt);
+			
+			boolean f =dao.updateAccount(acc);
+			
+			if(f)
+				System.out.println("Deposited Sucessfully...");
+			else
+				System.out.println("Technical Error .....");
+					
+		}		
+	}
+
+}
+
+
+WithdrawUseCase.java:-
+-----------------------------
+
+public class WithdrawUseCase {
+	
+	public static void main(String[] args) {
+		
+		AccountDao dao=new AccountDaoImpl();
+		
+		Scanner sc=new Scanner(System.in);
+		
+		System.out.println("Enter Account number");
+		int ano=sc.nextInt();
+		
+		Account acc= dao.findAccount(ano);
+		
+		if(acc == null)
+			System.out.println("Account does not exist..");
+		else{
+		
+			System.out.println("Enter the withdrawing amount");
+			int amt=sc.nextInt();
+			
+			if(amt <= acc.getBalance()){
+				
+				acc.setBalance(acc.getBalance()-amt);
+				boolean f=dao.updateAccount(acc);
+				if(f)
+					System.out.println("please collect the cash...");
+				else
+					System.out.println("Technical Error...");
+				
+				
+			}else
+				System.out.println("Insufficient Amount..");	
+		}		
+	}
+
+}
+
+
+
+*****************************************************************************************************************************************************
+
+
+limitation of EM methods in performing CRUD operations:-
+----------------------------------------------------------------------
+
+persist();
+find()
+merge();
+
+1.Retrieving Entity obj based on only ID field(PK field) @Id
+
+2.multiple Entity obj retrival is not possible (multiple record)
+
+3.bulk update and bulk delete is also not possible
+
+4.to access Entity obj we can not specify some extra condition.
+
+
+--to overcome the above limitation JPA has provided JPQL (java persistence query language). 
+
+similarities bt JPQL and sql:-
+----------------------------------
+
+--keywords in the both the langauges are case insensetive
+
+--GROUP BY,ORDER BY,where clause r similar
+
+--aggregrate function r similar
+
+--the way we express the condition to perform the CRUD operation is almost simmilar.
+
+
+diff bt JPQL and sql:-
+--------------------------
+--sql queries are expressed in the term of table and columns, where as jpql query is expressed in the term of Entity class names and its variables.
+
+--the name of the class and its variables are case sensitive.
+
+--sql is not portable across multiple dbms, where jpql is portable.
+
+
+sql> select name,marks from student; (name and marks are the column name and student is the table name)
+
+jpql> select name,marks from Student; (here name and marks are the variables defined inside the Student class)
+
+
+
+steps to use the jpql in JPA application:-
+----------------------------------------------
+
+
+step 1:- develop the JPQL query as string.
+
+step 2:- create javax.persistnce.Query(I) object by calling "createQuery(-)" method on the EM object.
+
+ex:-
+
+Query q =em.createQuery("JPQL query");  
+
+step 3:- bind the values if any placeholders are used.(here we have 2 types of place holders 1.positional 2.named placeholders).
+
+step 4:- submit the jpql query by calling either one of the following methods:-
+
+for select statments:-
+
+List getResultList();   (if more than one record.)
+Object getSingleResult();  (if atmost one record)
+
+
+for insert/update/delete :-
+
+int executeUpdate();  //this method should be called inside the tx area.
+
+ex:-
+
+
+
+
+in sql :-
+
+select * from account;
+
+in jpql:-
+
+select a from Account a;
+
+from Account;  //it is a shortcut
+
+
+ex:- getting all the records from the DB:-
+------------------------------------------------
+
+JPQLMain.java:-
+-------------------
+
+
+public class JPQLMain {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		//String jpql= "select a from Account a";
+		String jpql= "from Account";
+		Query q= em.createQuery(jpql);
+		
+		List<Account> list= q.getResultList();
+		
+		for(Account acc:list){
+			System.out.println(acc);
+		}		
+	}
+}
+
+
+
+
+
+search on non-pk:-
+-----------------------
+
+	EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		//String jpql= "select a from Account a where a.name='Ram' ";
+		String jpql= "from Account where name='Ram'";
+		Query q= em.createQuery(jpql);
+		
+		List<Account> list= q.getResultList();
+		
+		for(Account acc:list){
+			System.out.println(acc);
+		}	
+	}
+
+
+if we conform that only one row will come then :-
+-------------------------------------------------------
+
+	EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		//String jpql= "select a from Account a where a.name='Ram' ";
+		String jpql= "from Account where name='Ram'";
+		Query q= em.createQuery(jpql);
+		
+		//Object obj= q.getSingleResult();
+		//Account acc= (Account)obj;
+		
+		Account acc= (Account)q.getSingleResult();
+		
+		System.out.println(acc);
+
+--if the above query will return more that one result then it will throw a runtime exception
+
+in order to avoid the downcasting problem we should use TypedQuery instead of Query obj.
+
+--TypedQuery is the child interface of Query interface.
+
+ex:-
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		//String jpql= "select a from Account a where a.name='Ram' ";
+		String jpql= "from Account where name='Ram'";
+		TypedQuery<Account> q= em.createQuery(jpql,Account.class);
+		
+		Account acc= q.getSingleResult();
+		
+		System.out.println(acc);
+
+
+
+bulk update:-
+------------------
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		String jpql= "update Account set balance=balance+500";
+		
+		Query q= em.createQuery(jpql);
+		
+		em.getTransaction().begin();
+		int x= q.executeUpdate();
+		em.getTransaction().commit();
+		
+		System.out.println(x+" row updated...");
+
+
+using positional parameter:-
+---------------------------------
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		String jpql= "update Account set balance=balance+?5 where name=?6";
+		
+		Query q= em.createQuery(jpql);
+		
+		q.setParameter(5, 1000);
+		q.setParameter(6, "Manoj");
+		
+		em.getTransaction().begin();
+		int x=q.executeUpdate();
+		em.getTransaction().commit();
+		
+		
+		System.out.println(x+" record updated...");
+
+
+--index value can start with any number...
+
+using named parameter:-
+----------------------------
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		String jpql= "update Account set balance=balance+:bal where name=:nm";
+		
+		Query q= em.createQuery(jpql);
+		
+		q.setParameter("bal", 600);
+		q.setParameter("nm", "Ram");
+		
+		em.getTransaction().begin();
+		int x=q.executeUpdate();
+		em.getTransaction().commit();
+		
+		
+		System.out.println(x+" record updated...");
+
+
+1.--if we try to accees only one column then the return type will be :-
+
+either String obj,
+or any Wrapper class obj (Integer,Float)
+or 
+LocalDate 
+
+2.--if all column then the return type will be the Entity class.(internally it will be mapped.)
+
+
+
+3.if few columns then the return type will be Object[]. in this array each index will represent each column
+
+
+ex:- for 1 row and 1 column:-
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		String jpql= "select name from Account where accno=:ano";
+		
+		TypedQuery<String> q=em.createQuery(jpql,String.class);
+		
+		q.setParameter("ano", 4);
+		
+		String n= q.getSingleResult();
+		
+
+		System.out.println(n);
+		
+
+ex: multiple row and 1 column:-
+-------------------------------------
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		String jpql= "select balance from Account";
+		
+		TypedQuery<Integer> q=em.createQuery(jpql,Integer.class);
+		
+		List<Integer> list= q.getResultList();
+		
+		System.out.println(list);
+
+ex3:- few column and all rows:-
+-----------------------------------
+
+	EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		String jpql= "select name,balance from Account";
+		
+		TypedQuery<Object[]> q=em.createQuery(jpql,Object[].class);
+		
+		List<Object[]> list= q.getResultList();
+		
+
+		for(Object[] or:list){
+			
+			String name=(String)or[0];
+			System.out.println("Name is "+name.toUpperCase());
+			System.out.println("Balance is "+or[1]);
+			
+			System.out.println("-------------------------");
+			
+		}
+			
+	}
+
+aggregrate function:-
+------------------------
+
+--any aggregrate function will return :-
+
+min,max: Integer
+avg : Double
+sum : Long
+
+
+ex:-
+
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		String jpql= "select sum(balance) from Account";
+		
+		TypedQuery<Long> q=em.createQuery(jpql,Long.class);
+		
+		long result= q.getSingleResult();
+		
+		System.out.println(result);
+
+
+
+
+Named Queries:-
+============
+
+ex:-
+
+
+Account.java:- (Entity class):-
+-----------------------------------
+
+
+
+@Entity
+@NamedQuery(name = "account.getBalance",query = "from Account where balance <:bal")
+public class Account  {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int accno;
+	private String name;
+	private int balance;
+
+
+
+
+
+
+
+JPQLMain.java:-
+------------------
+
+
+public class JPQLMain {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		Query q= em.createNamedQuery("account.getBalance");
+		
+		q.setParameter("bal", 5000);
+		
+		List<Account> list= q.getResultList();
+		
+		list.forEach(a -> System.out.println(a));
+		
+	}
+
+}
+
+
+
+NativeQueries:-
+============
+
+--here we write the Query in the term of tables and their columns
+
+
+
+		EntityManager em= EMUtil.provideEntityManager();
+		
+		
+		String nq="select * from account"; //here account is the table name
+		
+	 	Query q= em.createNativeQuery(nq, Account.class);
+	
+	 	List<Account> list= q.getResultList();
+	 	
+	 	list.forEach(a -> System.out.println(a));
+
+	 	
+NamedNativeQuery:-
+------------------------
+
+Account.java:-
+-----------------
+
+
+@Entity
+@NamedNativeQuery(name="allAccount" ,query = "select * from account",resultClass=Account.class)
+public class Account implements Serializable {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int accno;
+	private String name;
+	private int balance;
+	
+--
+--
+}
+
+JPQLMain.java:-
+-------------------
+
+
+public class JPQLMain {
+	
+	public static void main(String[] args) {
+		
+		EntityManager em= EMUtil.provideEntityManager();
+		
+	 	Query q= em.createNamedQuery("allAccount");
+	
+	 	List<Account> list= q.getResultList();
+	 	
+	 	list.forEach(a -> System.out.println(a));		
+	}
+
+}
+	
